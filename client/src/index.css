@@ -1,0 +1,97 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --radius: 0.75rem;
+  --background: hsl(0, 0%, 98%);
+  --foreground: hsl(210, 10%, 15%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(210, 10%, 15%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(210, 10%, 15%);
+  --primary: hsl(210, 70%, 58%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(45, 85%, 62%);
+  --secondary-foreground: hsl(210, 10%, 15%);
+  --muted: hsl(210, 20%, 96%);
+  --muted-foreground: hsl(210, 10%, 45%);
+  --accent: hsl(45, 85%, 62%);
+  --accent-foreground: hsl(210, 10%, 15%);
+  --destructive: hsl(356, 91%, 54%);
+  --destructive-foreground: hsl(0, 0%, 100%);
+  --border: hsl(210, 20%, 90%);
+  --input: hsl(210, 20%, 96%);
+  --ring: hsl(210, 70%, 58%);
+}
+
+[data-theme="dark"] {
+  --background: hsl(215, 28%, 10%);
+  --foreground: hsl(210, 20%, 95%);
+  --card: hsl(215, 25%, 12%);
+  --card-foreground: hsl(210, 20%, 95%);
+  --popover: hsl(215, 25%, 12%);
+  --popover-foreground: hsl(210, 20%, 95%);
+  --primary: hsl(210, 70%, 58%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(45, 85%, 62%);
+  --secondary-foreground: hsl(215, 28%, 10%);
+  --muted: hsl(215, 25%, 15%);
+  --muted-foreground: hsl(210, 15%, 65%);
+  --accent: hsl(45, 85%, 62%);
+  --accent-foreground: hsl(215, 28%, 10%);
+  --destructive: hsl(356, 91%, 54%);
+  --destructive-foreground: hsl(0, 0%, 100%);
+  --border: hsl(215, 25%, 20%);
+  --input: hsl(215, 25%, 15%);
+  --ring: hsl(210, 70%, 58%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+}
+
+@layer components {
+  .app-container {
+    max-width: 428px;
+    margin: 0 auto;
+    min-height: 100vh;
+    background: var(--background);
+    color: var(--foreground);
+  }
+
+  .gradient-text {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .bible-verse {
+    font-family: 'Crimson Text', serif;
+    line-height: 1.8;
+  }
+
+  .devotional-card {
+    background: linear-gradient(135deg, var(--card) 0%, var(--muted) 100%);
+  }
+
+  .hymn-player {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+  }
+
+  .quiz-option {
+    transition: all 0.3s ease;
+  }
+
+  .quiz-option:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+  }
+}
