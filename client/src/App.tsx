@@ -10,6 +10,9 @@ import Notes from "./pages/notes";
 import Store from "./pages/store";
 import Settings from "./pages/settings";
 import Quiz from "./pages/quiz";
+import Calendar from "./pages/calendar";
+import Devotional from "./pages/devotional";
+import Checkout from "./pages/checkout";
 
 function AppContent() {
   const { user } = useApp();
@@ -29,6 +32,9 @@ function AppContent() {
         <Route path="/store" component={Store} />
         <Route path="/settings" component={Settings} />
         <Route path="/quiz" component={Quiz} />
+        <Route path="/calendar" component={Calendar} />
+        <Route path="/devotional" component={Devotional} />
+        <Route path="/checkout" component={Checkout} />
         <Route>
           <Redirect to="/" />
         </Route>

@@ -47,7 +47,8 @@ export default function Store() {
   const otherProducts = products.filter(p => !p.featured);
 
   const handlePurchase = (productId: number) => {
-    alert(`Funcionalidade de compra será integrada com Mercado Pago/Stripe. Produto ID: ${productId}`);
+    // Redirect to checkout page with product ID
+    window.location.href = `/checkout?product=${productId}`;
   };
 
   const formatPrice = (price: number) => {
