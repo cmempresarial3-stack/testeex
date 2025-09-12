@@ -41,9 +41,15 @@ export default function Settings() {
     }
   };
 
-  const handleAddPhoto = () => {
-    // In a real app, this would open image picker
-    alert("Funcionalidade de foto será implementada com Expo Image Picker");
+  const handleAddPhoto = (photoUrl?: string) => {
+    if (user) {
+      // For now, we'll use a placeholder avatar or remove photo
+      const newPhotoUrl = photoUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=3b82f6&color=fff&size=128`;
+      setUser({
+        ...user,
+        photo: newPhotoUrl,
+      });
+    }
     setIsAddingPhoto(false);
   };
 
@@ -88,7 +94,6 @@ export default function Settings() {
   return (
     <MobileContainer>
       <div className="p-4 pb-24">
-        <h2 className="text-2xl font-bold mb-6">Configurações</h2>
 
         {/* User Profile */}
         <Card className="mb-6">
@@ -120,7 +125,10 @@ export default function Settings() {
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  onClick={() => setEditName(user?.name || "")}
+                  onClick={() => {
+                    setEditName(user?.name || "");
+                    setIsEditingProfile(true);
+                  }}
                   className="p-0 h-auto text-primary"
                   data-testid="button-edit-profile"
                 >
@@ -141,11 +149,30 @@ export default function Settings() {
                     <Camera className="w-8 h-8 text-muted-foreground" />
                   </div>
                   <p className="text-sm text-muted-foreground mb-4">
-                    Funcionalidade será implementada em breve
+                    Escolha uma opção para sua foto de perfil:
                   </p>
-                  <Button onClick={handleAddPhoto} data-testid="button-save-photo">
-                    OK
-                  </Button>
+                  <div className="space-y-2">
+                    <Button 
+                      onClick={() => handleAddPhoto()}
+                      className="w-full"
+                      data-testid="button-generate-avatar"
+                    >
+                      Gerar Avatar com Iniciais
+                    </Button>
+                    <Button 
+                      variant="outline"
+                      onClick={() => {
+                        if (user) {
+                          setUser({ ...user, photo: undefined });
+                        }
+                        setIsAddingPhoto(false);
+                      }}
+                      className="w-full"
+                      data-testid="button-remove-photo"
+                    >
+                      Remover Foto
+                    </Button>
+                  </div>
                 </div>
               </DialogContent>
             </Dialog>
