@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { User, Bell, Moon, MessageSquare, Store, Share2, Heart, Edit, Instagram, Youtube, Clock, TestTube2 } from "lucide-react";
+import { User, Bell, Moon, MessageSquare, Store, Share2, Heart, Edit, Instagram, Youtube, Clock, TestTube2, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,6 +20,7 @@ export default function Settings() {
   const [feedback, setFeedback] = useState("");
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [editName, setEditName] = useState(user?.name || "");
+  const [isAddingPhoto, setIsAddingPhoto] = useState(false);
 
   const handleSaveFeedback = () => {
     if (feedback.trim()) {
@@ -37,6 +38,12 @@ export default function Settings() {
       });
       setIsEditingProfile(false);
     }
+  };
+
+  const handleAddPhoto = () => {
+    // In a real app, this would open image picker
+    alert("Funcionalidade de foto será implementada com Expo Image Picker");
+    setIsAddingPhoto(false);
   };
 
   const handleNotificationToggle = async (checked: boolean) => {
@@ -84,36 +91,69 @@ export default function Settings() {
 
         {/* User Profile */}
         <Card className="mb-6">
-          <CardContent className="p-6 text-center">
-            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-primary flex items-center justify-center">
-              {user?.photo ? (
-                <img src={user.photo} alt="Profile" className="w-20 h-20 rounded-full object-cover" />
-              ) : (
-                <User className="w-8 h-8 text-primary-foreground" />
-              )}
-            </div>
-            <h3 className="text-xl font-semibold mb-2" data-testid="text-user-name">
-              {user?.name || "Usuário"}
-            </h3>
-            <p className="text-muted-foreground mb-3">
-              {getMembershipDuration()}
-            </p>
-            
-            <Dialog open={isEditingProfile} onOpenChange={setIsEditingProfile}>
-              <DialogTrigger asChild>
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-4">
+              <div className="relative">
+                <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center">
+                  {user?.photo ? (
+                    <img src={user.photo} alt="Profile" className="w-16 h-16 rounded-full object-cover" />
+                  ) : (
+                    <User className="w-6 h-6 text-primary-foreground" />
+                  )}
+                </div>
+                <button
+                  onClick={() => setIsAddingPhoto(true)}
+                  className="absolute -bottom-1 -right-1 w-6 h-6 bg-secondary rounded-full flex items-center justify-center border-2 border-background hover:bg-secondary/80"
+                  data-testid="button-add-photo"
+                >
+                  <Camera className="w-3 h-3 text-secondary-foreground" />
+                </button>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-xl font-semibold mb-1" data-testid="text-user-name">
+                  {user?.name || "Usuário"}
+                </h3>
+                <p className="text-muted-foreground text-sm mb-2">
+                  {getMembershipDuration()}
+                </p>
                 <Button 
                   variant="ghost" 
                   size="sm" 
                   onClick={() => setEditName(user?.name || "")}
+                  className="p-0 h-auto text-primary"
                   data-testid="button-edit-profile"
                 >
-                  <Edit className="w-4 h-4 mr-2" />
-                  Editar Perfil
+                  <Edit className="w-3 h-3 mr-1" />
+                  Editar nome
                 </Button>
-              </DialogTrigger>
+              </div>
+            </div>
+            
+            {/* Photo Dialog */}
+            <Dialog open={isAddingPhoto} onOpenChange={setIsAddingPhoto}>
               <DialogContent className="max-w-[95vw] w-full mx-auto">
                 <DialogHeader>
-                  <DialogTitle>Editar Perfil</DialogTitle>
+                  <DialogTitle>Adicionar Foto</DialogTitle>
+                </DialogHeader>
+                <div className="text-center py-6">
+                  <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center border-2 border-dashed border-border">
+                    <Camera className="w-8 h-8 text-muted-foreground" />
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Funcionalidade será implementada em breve
+                  </p>
+                  <Button onClick={handleAddPhoto} data-testid="button-save-photo">
+                    OK
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+
+            {/* Edit Name Dialog */}
+            <Dialog open={isEditingProfile} onOpenChange={setIsEditingProfile}>
+              <DialogContent className="max-w-[95vw] w-full mx-auto">
+                <DialogHeader>
+                  <DialogTitle>Editar Nome</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4">
                   <div>
@@ -213,28 +253,69 @@ export default function Settings() {
             </CardContent>
           </Card>
 
-          {/* Feedback */}
+          {/* Alarme de Oração */}
           <Card>
             <CardContent className="p-4">
-              <div className="flex items-center mb-3">
-                <MessageSquare className="w-5 h-5 text-primary mr-3" />
-                <h4 className="font-semibold">Feedback</h4>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center">
+                  <Bell className="w-5 h-5 text-primary mr-3" />
+                  <h4 className="font-semibold">Alarme de Oração</h4>
+                </div>
+                <Switch 
+                  checked={settings.prayerAlarmEnabled || false}
+                  onCheckedChange={(checked) => setSettings({...settings, prayerAlarmEnabled: checked})}
+                  data-testid="switch-prayer-alarm"
+                />
               </div>
-              <Textarea 
-                placeholder="Compartilhe suas sugestões..." 
-                value={feedback}
-                onChange={(e) => setFeedback(e.target.value)}
-                className="resize-none h-20 text-sm mb-2"
-                data-testid="textarea-feedback"
-              />
-              <Button 
-                size="sm" 
-                onClick={handleSaveFeedback}
-                disabled={!feedback.trim()}
-                data-testid="button-send-feedback"
-              >
-                Enviar Feedback
-              </Button>
+              {settings.prayerAlarmEnabled && (
+                <div className="space-y-3 mt-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Horário da Manhã</Label>
+                      <Input 
+                        type="time" 
+                        value={settings.morningPrayerTime || '07:00'}
+                        onChange={(e) => setSettings({...settings, morningPrayerTime: e.target.value})}
+                        className="mt-1"
+                        data-testid="input-morning-prayer"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Horário da Noite</Label>
+                      <Input 
+                        type="time" 
+                        value={settings.eveningPrayerTime || '19:00'}
+                        onChange={(e) => setSettings({...settings, eveningPrayerTime: e.target.value})}
+                        className="mt-1"
+                        data-testid="input-evening-prayer"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-xs text-muted-foreground mb-2 block">Som do Alarme</Label>
+                    <select 
+                      value={settings.prayerAlarmSound || 'bell'}
+                      onChange={(e) => setSettings({...settings, prayerAlarmSound: e.target.value})}
+                      className="w-full p-2 border rounded-md bg-background text-sm"
+                      data-testid="select-prayer-sound"
+                    >
+                      <option value="bell">Sino Suave</option>
+                      <option value="chime">Carrilhão</option>
+                      <option value="nature">Sons da Natureza</option>
+                      <option value="worship">Música de Adoração</option>
+                      <option value="peaceful">Melodia Pacifica</option>
+                    </select>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full"
+                    data-testid="button-test-prayer-alarm"
+                  >
+                    Testar Som
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -283,6 +364,31 @@ export default function Settings() {
                   <span className="text-sm">YouTube</span>
                 </a>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Feedback */}
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center mb-3">
+                <MessageSquare className="w-5 h-5 text-primary mr-3" />
+                <h4 className="font-semibold">Sugestões</h4>
+              </div>
+              <Textarea 
+                placeholder="Compartilhe suas sugestões..." 
+                value={feedback}
+                onChange={(e) => setFeedback(e.target.value)}
+                className="resize-none h-20 text-sm mb-2"
+                data-testid="textarea-feedback"
+              />
+              <Button 
+                size="sm" 
+                onClick={handleSaveFeedback}
+                disabled={!feedback.trim()}
+                data-testid="button-send-feedback"
+              >
+                Enviar Sugestão
+              </Button>
             </CardContent>
           </Card>
         </div>
