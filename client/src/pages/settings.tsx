@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { User, Bell, Moon, MessageSquare, Store, Share2, Heart, Edit, Instagram, Youtube } from "lucide-react";
+import { User, Bell, Moon, MessageSquare, Store, Share2, Heart, Edit, Instagram, Youtube, Clock, TestTube2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,11 +9,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { MobileContainer } from "@/components/ui/mobile-container";
 import { useApp } from "@/context/app-context";
+import { useNotifications } from "@/context/notification-context";
 import { useTheme } from "@/hooks/use-theme";
 import { Link } from "wouter";
 
 export default function Settings() {
   const { user, setUser, settings, setSettings } = useApp();
+  const { requestPermission, sendTestNotification, scheduleNotifications, getPermissionStatus } = useNotifications();
   const { isDarkMode, toggleTheme } = useTheme();
   const [feedback, setFeedback] = useState("");
   const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -37,11 +39,29 @@ export default function Settings() {
     }
   };
 
-  const handleNotificationToggle = (checked: boolean) => {
+  const handleNotificationToggle = async (checked: boolean) => {
+    if (checked && getPermissionStatus() !== 'granted') {
+      const granted = await requestPermission();
+      if (!granted) {
+        alert("Precisamos da sua permissão para enviar notificações carinhosas! Por favor, permita nas configurações do navegador.");
+        return;
+      }
+    }
+    
     setSettings({
       ...settings,
       notificationsEnabled: checked,
     });
+    
+    scheduleNotifications(checked);
+  };
+
+  const handleTestNotification = () => {
+    if (getPermissionStatus() === 'granted') {
+      sendTestNotification();
+    } else {
+      alert("Por favor, ative as notificações primeiro.");
+    }
   };
 
   const getMembershipDuration = () => {
@@ -141,22 +161,35 @@ export default function Settings() {
                 />
               </div>
               {settings.notificationsEnabled && (
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span>Hora da manhã</span>
-                    <span className="text-muted-foreground">{settings.morningTime}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Hora da noite</span>
-                    <span className="text-muted-foreground">{settings.eveningTime}</span>
+                <div className="space-y-3 mt-4">
+                  <div className="p-3 bg-muted/50 rounded-lg">
+                    <div className="flex items-center mb-2">
+                      <Clock className="w-4 h-4 text-primary mr-2" />
+                      <span className="text-sm font-medium">Configurações dos Lembretes</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mb-3">
+                      Receba lembretes carinhosos a cada 3 dias alternando na semana
+                    </p>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between items-center">
+                        <span>Frequência</span>
+                        <span className="text-muted-foreground">A cada 3 dias</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span>Horários permitidos</span>
+                        <span className="text-muted-foreground">8h às 20h</span>
+                      </div>
+                    </div>
                   </div>
                   <Button 
-                    variant="ghost" 
+                    variant="outline" 
                     size="sm" 
-                    className="p-0 h-auto text-primary"
-                    data-testid="button-configure-sounds"
+                    onClick={handleTestNotification}
+                    className="w-full"
+                    data-testid="button-test-notification"
                   >
-                    Configurar Sons
+                    <TestTube2 className="w-4 h-4 mr-2" />
+                    Testar Notificação
                   </Button>
                 </div>
               )}

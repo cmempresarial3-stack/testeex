@@ -1,7 +1,9 @@
 import { Switch, Route, Redirect } from "wouter";
 import { AppProvider, useApp } from "./context/app-context";
+import { NotificationProvider } from "./context/notification-context";
 import { BottomNavigation } from "./components/layout/bottom-navigation";
 import { TopBar } from "./components/layout/top-bar";
+import { QuizModal } from "./components/modals/quiz-modal";
 import Home from "./pages/home";
 import Onboarding from "./pages/onboarding";
 import Bible from "./pages/bible";
@@ -42,6 +44,7 @@ function AppContent() {
       </Switch>
       
       <BottomNavigation />
+      <QuizModal />
     </>
   );
 }
@@ -49,7 +52,9 @@ function AppContent() {
 function App() {
   return (
     <AppProvider>
-      <AppContent />
+      <NotificationProvider>
+        <AppContent />
+      </NotificationProvider>
     </AppProvider>
   );
 }
