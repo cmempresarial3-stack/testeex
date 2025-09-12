@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Link } from "wouter";
 import { Heart, BookOpen, Music, StickyNote, Calendar, Store, Share2, Instagram, Youtube } from "lucide-react";
+import { SiTiktok } from "react-icons/si";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { MobileContainer } from "@/components/ui/mobile-container";
@@ -149,14 +150,30 @@ export default function Home() {
         <Card className="shadow-sm">
           <CardContent className="p-4">
             <h4 className="font-semibold mb-3">Conecte-se conosco</h4>
-            <div className="flex space-x-4">
-              <a href="#" className="flex items-center space-x-2 text-sm text-muted-foreground hover:text-primary" data-testid="link-instagram">
-                <Instagram className="w-4 h-4" />
-                <span>Instagram</span>
+            <div className="grid grid-cols-3 gap-2">
+              <a 
+                href="#" 
+                className="flex flex-col items-center space-y-1 p-3 rounded-lg hover:bg-muted transition-colors"
+                data-testid="link-instagram"
+              >
+                <Instagram className="w-6 h-6 text-pink-500" />
+                <span className="text-xs font-medium">Instagram</span>
               </a>
-              <a href="#" className="flex items-center space-x-2 text-sm text-muted-foreground hover:text-primary" data-testid="link-youtube">
-                <Youtube className="w-4 h-4" />
-                <span>YouTube</span>
+              <a 
+                href="#" 
+                className="flex flex-col items-center space-y-1 p-3 rounded-lg hover:bg-muted transition-colors"
+                data-testid="link-youtube"
+              >
+                <Youtube className="w-6 h-6 text-red-500" />
+                <span className="text-xs font-medium">YouTube</span>
+              </a>
+              <a 
+                href="#" 
+                className="flex flex-col items-center space-y-1 p-3 rounded-lg hover:bg-muted transition-colors"
+                data-testid="link-tiktok"
+              >
+                <SiTiktok className="w-6 h-6 text-black dark:text-white" />
+                <span className="text-xs font-medium">TikTok</span>
               </a>
             </div>
           </CardContent>
