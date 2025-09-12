@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { User, Bell, Moon, MessageSquare, Store, Share2, Heart, Edit, Instagram, Youtube, Clock, TestTube2, Camera } from "lucide-react";
+import { SiTiktok } from "react-icons/si";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -186,56 +187,6 @@ export default function Settings() {
 
         {/* Settings Options */}
         <div className="space-y-4">
-          {/* Notifications */}
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center">
-                  <Bell className="w-5 h-5 text-primary mr-3" />
-                  <h4 className="font-semibold">Notificações</h4>
-                </div>
-                <Switch 
-                  checked={settings.notificationsEnabled}
-                  onCheckedChange={handleNotificationToggle}
-                  data-testid="switch-notifications"
-                />
-              </div>
-              {settings.notificationsEnabled && (
-                <div className="space-y-3 mt-4">
-                  <div className="p-3 bg-muted/50 rounded-lg">
-                    <div className="flex items-center mb-2">
-                      <Clock className="w-4 h-4 text-primary mr-2" />
-                      <span className="text-sm font-medium">Configurações dos Lembretes</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground mb-3">
-                      Receba lembretes carinhosos a cada 3 dias alternando na semana
-                    </p>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between items-center">
-                        <span>Frequência</span>
-                        <span className="text-muted-foreground">A cada 3 dias</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span>Horários permitidos</span>
-                        <span className="text-muted-foreground">8h às 20h</span>
-                      </div>
-                    </div>
-                  </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={handleTestNotification}
-                    className="w-full"
-                    data-testid="button-test-notification"
-                  >
-                    <TestTube2 className="w-4 h-4 mr-2" />
-                    Testar Notificação
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
           {/* Dark Mode */}
           <Card>
             <CardContent className="p-4">
@@ -377,22 +328,30 @@ export default function Settings() {
                 <Share2 className="w-5 h-5 text-primary mr-3" />
                 Redes Sociais
               </h4>
-              <div className="flex space-x-4">
+              <div className="grid grid-cols-3 gap-2">
                 <a 
                   href="#" 
-                  className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted transition-colors"
+                  className="flex flex-col items-center space-y-1 p-3 rounded-lg hover:bg-muted transition-colors"
                   data-testid="link-instagram-settings"
                 >
-                  <Instagram className="w-5 h-5 text-pink-500" />
-                  <span className="text-sm">Instagram</span>
+                  <Instagram className="w-6 h-6 text-pink-500" />
+                  <span className="text-xs font-medium">Instagram</span>
                 </a>
                 <a 
                   href="#" 
-                  className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted transition-colors"
+                  className="flex flex-col items-center space-y-1 p-3 rounded-lg hover:bg-muted transition-colors"
                   data-testid="link-youtube-settings"
                 >
-                  <Youtube className="w-5 h-5 text-red-500" />
-                  <span className="text-sm">YouTube</span>
+                  <Youtube className="w-6 h-6 text-red-500" />
+                  <span className="text-xs font-medium">YouTube</span>
+                </a>
+                <a 
+                  href="#" 
+                  className="flex flex-col items-center space-y-1 p-3 rounded-lg hover:bg-muted transition-colors"
+                  data-testid="link-tiktok-settings"
+                >
+                  <SiTiktok className="w-6 h-6 text-black dark:text-white" />
+                  <span className="text-xs font-medium">TikTok</span>
                 </a>
               </div>
             </CardContent>

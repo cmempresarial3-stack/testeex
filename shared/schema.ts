@@ -63,6 +63,12 @@ export const appSettingsSchema = z.object({
   morningTime: z.string(),
   eveningTime: z.string(),
   fontSize: z.enum(['small', 'medium', 'large']),
+  prayerAlarmEnabled: z.boolean().optional(),
+  morningPrayerEnabled: z.boolean().optional(),
+  eveningPrayerEnabled: z.boolean().optional(),
+  morningPrayerTime: z.string().optional(),
+  eveningPrayerTime: z.string().optional(),
+  prayerAlarmSound: z.string().optional(),
 });
 
 export type UserProfile = z.infer<typeof userProfileSchema>;

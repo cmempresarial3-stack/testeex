@@ -22,6 +22,12 @@ const defaultSettings: AppSettings = {
   morningTime: "07:00",
   eveningTime: "20:00",
   fontSize: "medium",
+  prayerAlarmEnabled: false,
+  morningPrayerEnabled: false,
+  eveningPrayerEnabled: false,
+  morningPrayerTime: "07:00",
+  eveningPrayerTime: "19:00",
+  prayerAlarmSound: "bell",
 };
 
 export function AppProvider({ children }: { children: ReactNode }) {
