@@ -1,7 +1,7 @@
 import { Switch, Route, Redirect } from "wouter";
 import { AppProvider, useApp } from "./context/app-context";
 import { BottomNavigation } from "./components/layout/bottom-navigation";
-import { FloatingQuizButton } from "./components/layout/floating-quiz-button";
+import { TopBar } from "./components/layout/top-bar";
 import Home from "./pages/home";
 import Onboarding from "./pages/onboarding";
 import Bible from "./pages/bible";
@@ -24,6 +24,7 @@ function AppContent() {
 
   return (
     <>
+      <TopBar />
       <Switch>
         <Route path="/" component={Home} />
         <Route path="/bible" component={Bible} />
@@ -41,7 +42,6 @@ function AppContent() {
       </Switch>
       
       <BottomNavigation />
-      <FloatingQuizButton />
     </>
   );
 }
