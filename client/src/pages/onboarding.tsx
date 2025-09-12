@@ -71,9 +71,6 @@ export default function Onboarding() {
                 </span>
               )}
             </div>
-            <p className="text-sm text-muted-foreground">
-              Seu avatar será gerado automaticamente
-            </p>
           </div>
           
           <div>

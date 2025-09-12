@@ -15,6 +15,24 @@ interface BibleData {
   [key: string]: BibleBook;
 }
 
+interface BookResult {
+  type: 'book';
+  abbrev: string;
+  name: string;
+  score: number;
+}
+
+interface VerseResult {
+  type: 'verse';
+  text: string;
+  verse: number;
+  book: string;
+  chapter: number;
+  score: number;
+}
+
+type SearchResult = BookResult | VerseResult;
+
 const bibleBookNames: { [key: string]: string } = {
   "Gn": "Gênesis", "Ex": "Êxodo", "Lv": "Levítico", "Nm": "Números", "Dt": "Deuteronômio",
   "Js": "Josué", "Jz": "Juízes", "Rt": "Rute", "1Sm": "1 Samuel", "2Sm": "2 Samuel",
@@ -37,7 +55,11 @@ export default function Bible() {
   const [currentBookAbbrev, setCurrentBookAbbrev] = useState("Jo");
   const [currentChapter, setCurrentChapter] = useState(3);
   const [showBookSelector, setShowBookSelector] = useState(false);
+  const [showChapterSelector, setShowChapterSelector] = useState(false);
   const [bible, setBible] = useState<BibleData>({});
+  const [fontSize, setFontSize] = useState<'normal' | 'large' | 'extra-large'>('normal');
+  const [highlightedVerses, setHighlightedVerses] = useState<{[key: string]: 'yellow' | 'green' | 'blue' | null}>({});
+  const [showHighlightOptions, setShowHighlightOptions] = useState<number | null>(null);
 
   useEffect(() => {
     // Convert array format to object format for easier access
@@ -71,17 +93,79 @@ export default function Bible() {
     setShowBookSelector(false);
   };
 
+  // Improved search function to find books and verses
+  const searchResults = (): SearchResult[] => {
+    if (!searchQuery.trim()) return [];
+    
+    const query = searchQuery.toLowerCase().trim();
+    const results: SearchResult[] = [];
+    
+    // Search for book names
+    for (const [abbrev, name] of Object.entries(bibleBookNames)) {
+      if (name.toLowerCase().includes(query)) {
+        results.push({
+          type: 'book',
+          abbrev,
+          name,
+          score: name.toLowerCase() === query ? 10 : (name.toLowerCase().startsWith(query) ? 5 : 1)
+        } as BookResult);
+      }
+    }
+    
+    // Search in verses (limit to current book for performance)
+    if (currentText.length > 0) {
+      currentText.forEach((verseText, index) => {
+        if (verseText.toLowerCase().includes(query)) {
+          results.push({
+            type: 'verse',
+            text: verseText,
+            verse: index + 1,
+            book: currentBookName,
+            chapter: currentChapter,
+            score: 1
+          } as VerseResult);
+        }
+      });
+    }
+    
+    return results.sort((a, b) => b.score - a.score).slice(0, 10);
+  };
+
+  const toggleFontSize = () => {
+    setFontSize(current => {
+      switch (current) {
+        case 'normal': return 'large';
+        case 'large': return 'extra-large';
+        case 'extra-large': return 'normal';
+        default: return 'normal';
+      }
+    });
+  };
+
+  const highlightVerse = (verseNumber: number, color: 'yellow' | 'green' | 'blue' | null) => {
+    const verseKey = `${currentBookAbbrev}-${currentChapter}-${verseNumber}`;
+    setHighlightedVerses(prev => ({
+      ...prev,
+      [verseKey]: color
+    }));
+    setShowHighlightOptions(null);
+  };
+
+  const getVerseHighlight = (verseNumber: number) => {
+    const verseKey = `${currentBookAbbrev}-${currentChapter}-${verseNumber}`;
+    return highlightedVerses[verseKey] || null;
+  };
+
   return (
     <MobileContainer>
       <div className="p-4 pb-24">
         <div className="mb-6">
-          <h2 className="text-2xl font-bold mb-4">Bíblia Sagrada</h2>
           
           {/* Search Bar */}
           <div className="relative mb-4">
             <Input
               type="text"
-              placeholder="Buscar versículos..."
+              placeholder="Buscar livros ou versículos..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -90,39 +174,64 @@ export default function Bible() {
             <Search className="w-4 h-4 absolute left-3 top-3.5 text-muted-foreground" />
           </div>
 
-          {/* Book Selection */}
+          {/* Search Results */}
+          {searchQuery.trim() && (
+            <Card className="mb-4">
+              <CardContent className="p-4">
+                <h4 className="font-semibold mb-3">Resultados da Busca</h4>
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {searchResults().length > 0 ? (
+                    searchResults().map((result, index) => (
+                      <div key={index} className="p-2 rounded-lg bg-muted/20 hover:bg-muted/40 cursor-pointer" 
+                           onClick={() => {
+                             if (result.type === 'book') {
+                               changeBook(result.abbrev);
+                               setSearchQuery("");
+                             }
+                           }}>
+                        {result.type === 'book' ? (
+                          <div>
+                            <p className="font-medium text-primary">{result.name}</p>
+                            <p className="text-xs text-muted-foreground">Livro da Bíblia</p>
+                          </div>
+                        ) : (
+                          <div>
+                            <p className="text-sm">{result.text.substring(0, 100)}...</p>
+                            <p className="text-xs text-muted-foreground">{result.book} {result.chapter}:{result.verse}</p>
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground">Nenhum resultado encontrado</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Book and Chapter Selection */}
           <Card className="mb-4">
             <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-semibold">Livro Atual</h3>
+              <div className="flex items-center space-x-2 mb-3">
                 <Button 
-                  variant="ghost" 
+                  variant="outline" 
                   size="sm" 
                   onClick={() => setShowBookSelector(!showBookSelector)}
                   data-testid="button-change-book"
+                  className="flex-1"
                 >
-                  Alterar
+                  <span className="text-sm font-medium">{currentBookName}</span>
                 </Button>
-              </div>
-              <div className="flex items-center space-x-4">
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-primary" data-testid="text-current-book">
-                    {currentBookName}
-                  </p>
-                  <p className="text-xs text-muted-foreground">Livro</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-secondary" data-testid="text-current-chapter">
-                    {currentChapter}
-                  </p>
-                  <p className="text-xs text-muted-foreground">Capítulo</p>
-                </div>
-                <div className="flex-1">
-                  <Button className="w-full text-sm font-medium" data-testid="button-audio-tts">
-                    <Play className="w-4 h-4 mr-2" />
-                    Audio (TTS)
-                  </Button>
-                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setShowChapterSelector(!showChapterSelector)}
+                  data-testid="button-change-chapter"
+                  className="flex-none px-4"
+                >
+                  <span className="text-sm font-medium">Cap. {currentChapter}</span>
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -150,28 +259,65 @@ export default function Bible() {
             </Card>
           )}
 
+          {/* Chapter Selector */}
+          {showChapterSelector && (
+            <Card className="mb-4">
+              <CardContent className="p-4">
+                <h4 className="font-semibold mb-3">Selecionar Capítulo</h4>
+                <div className="grid grid-cols-6 gap-2 max-h-48 overflow-y-auto">
+                  {Array.from({ length: maxChapters }, (_, i) => i + 1).map(chapter => (
+                    <Button
+                      key={chapter}
+                      variant={chapter === currentChapter ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => {
+                        setCurrentChapter(chapter);
+                        setShowChapterSelector(false);
+                      }}
+                      className="text-xs"
+                      data-testid={`button-chapter-${chapter}`}
+                    >
+                      {chapter}
+                    </Button>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Navigation */}
           <div className="flex items-center justify-between mb-4">
             <Button 
               variant="outline" 
-              className="flex items-center" 
+              size="icon"
               onClick={prevChapter}
               disabled={currentChapter <= 1}
               data-testid="button-prev-chapter"
             >
-              <ChevronLeft className="w-4 h-4 mr-1" />
-              Anterior
+              <ChevronLeft className="w-4 h-4" />
             </Button>
             <span className="font-medium">{currentBookName} {currentChapter}</span>
             <Button 
               variant="outline" 
-              className="flex items-center" 
+              size="icon"
               onClick={nextChapter}
               disabled={currentChapter >= maxChapters}
               data-testid="button-next-chapter"
             >
-              Próximo
-              <ChevronRight className="w-4 h-4 ml-1" />
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
+
+          {/* Font Size Control */}
+          <div className="flex justify-end mb-2">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={toggleFontSize}
+              className="text-xs"
+              data-testid="button-font-size"
+            >
+              Fonte: {fontSize === 'normal' ? 'Normal' : fontSize === 'large' ? 'Grande' : 'Muito Grande'}
             </Button>
           </div>
 
@@ -179,12 +325,57 @@ export default function Bible() {
           <Card>
             <CardContent className="p-6 leading-relaxed">
               {currentText.length > 0 ? (
-                currentText.map((verseText, index) => (
-                  <p key={index + 1} className="mb-4" data-testid={`verse-${index + 1}`}>
-                    <span className="text-primary font-semibold mr-2">{index + 1}</span>
-                    {verseText}
-                  </p>
-                ))
+                currentText.map((verseText, index) => {
+                  const verseNumber = index + 1;
+                  const highlight = getVerseHighlight(verseNumber);
+                  const fontClass = fontSize === 'large' ? 'text-lg' : fontSize === 'extra-large' ? 'text-xl' : 'text-base';
+                  const highlightClass = highlight === 'yellow' ? 'bg-yellow-200 dark:bg-yellow-800' : 
+                                       highlight === 'green' ? 'bg-green-200 dark:bg-green-800' :
+                                       highlight === 'blue' ? 'bg-blue-200 dark:bg-blue-800' : '';
+                  
+                  return (
+                    <div key={verseNumber} className="relative">
+                      <p 
+                        className={`mb-4 cursor-pointer hover:bg-muted/20 p-2 rounded ${fontClass} ${highlightClass}`} 
+                        data-testid={`verse-${verseNumber}`}
+                        onClick={() => setShowHighlightOptions(showHighlightOptions === verseNumber ? null : verseNumber)}
+                      >
+                        <span className="text-primary font-semibold mr-2">{verseNumber}</span>
+                        {verseText}
+                      </p>
+                      
+                      {/* Highlight Options */}
+                      {showHighlightOptions === verseNumber && (
+                        <div className="absolute right-2 top-2 bg-background border border-border rounded-lg shadow-lg p-2 z-10">
+                          <div className="flex space-x-1">
+                            <button
+                              onClick={() => highlightVerse(verseNumber, 'yellow')}
+                              className="w-6 h-6 rounded-full bg-yellow-300 hover:bg-yellow-400"
+                              title="Destacar em amarelo"
+                            />
+                            <button
+                              onClick={() => highlightVerse(verseNumber, 'green')}
+                              className="w-6 h-6 rounded-full bg-green-300 hover:bg-green-400"
+                              title="Destacar em verde"
+                            />
+                            <button
+                              onClick={() => highlightVerse(verseNumber, 'blue')}
+                              className="w-6 h-6 rounded-full bg-blue-300 hover:bg-blue-400"
+                              title="Destacar em azul"
+                            />
+                            <button
+                              onClick={() => highlightVerse(verseNumber, null)}
+                              className="w-6 h-6 rounded-full bg-gray-300 hover:bg-gray-400 flex items-center justify-center text-xs"
+                              title="Remover destaque"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
               ) : (
                 <p className="text-muted-foreground text-center py-8">
                   Carregando capítulo...
@@ -192,16 +383,44 @@ export default function Bible() {
               )}
 
               {/* Actions */}
-              <div className="flex items-center justify-center space-x-2 mt-6 pt-4 border-t border-border">
-                <Button variant="outline" size="icon" data-testid="button-bookmark">
-                  <Bookmark className="w-4 h-4" />
-                </Button>
-                <Button variant="outline" size="icon" data-testid="button-note">
-                  <StickyNote className="w-4 h-4" />
-                </Button>
-                <Button variant="outline" size="icon" data-testid="button-share">
-                  <Share2 className="w-4 h-4" />
-                </Button>
+              <div className="flex items-center justify-between mt-6 pt-4 border-t border-border">
+                <div className="flex items-center space-x-2">
+                  <Button 
+                    variant="outline" 
+                    size="icon"
+                    onClick={prevChapter}
+                    disabled={currentChapter <= 1}
+                    data-testid="button-prev-chapter-bottom"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="icon"
+                    onClick={nextChapter}
+                    disabled={currentChapter >= maxChapters}
+                    data-testid="button-next-chapter-bottom"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Button variant="outline" size="icon" data-testid="button-bookmark">
+                    <Bookmark className="w-4 h-4" />
+                  </Button>
+                  <Button variant="outline" size="icon" data-testid="button-note">
+                    <StickyNote className="w-4 h-4" />
+                  </Button>
+                  <Button variant="outline" size="icon" data-testid="button-share">
+                    <Share2 className="w-4 h-4" />
+                  </Button>
+                </div>
+                <div className="flex items-center">
+                  <Button variant="ghost" size="sm" className="text-xs" data-testid="button-audio-tts">
+                    <Play className="w-3 h-3 mr-1" />
+                    Áudio
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>

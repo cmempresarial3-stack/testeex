@@ -178,14 +178,6 @@ export default function Settings() {
                       Fazer Upload de Foto
                     </Button>
                     <Button 
-                      onClick={() => handleAddPhoto()}
-                      variant="outline"
-                      className="w-full"
-                      data-testid="button-generate-avatar"
-                    >
-                      Gerar Avatar com Iniciais
-                    </Button>
-                    <Button 
                       variant="outline"
                       onClick={() => {
                         if (user) {

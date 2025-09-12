@@ -125,11 +125,11 @@ export default function Devotional() {
               <Button 
                 variant="outline" 
                 onClick={previousDevotional}
-                className="flex items-center space-x-2"
+                className="flex items-center justify-center"
+                size="icon"
                 data-testid="button-previous-devotional"
               >
                 <ChevronLeft className="w-4 h-4" />
-                <span>Anterior</span>
               </Button>
 
               <div className="flex space-x-1">
@@ -150,10 +150,10 @@ export default function Devotional() {
               <Button 
                 variant="outline" 
                 onClick={nextDevotional}
-                className="flex items-center space-x-2"
+                className="flex items-center justify-center"
+                size="icon"
                 data-testid="button-next-devotional"
               >
-                <span>Próximo</span>
                 <ChevronRight className="w-4 h-4" />
               </Button>
             </div>
