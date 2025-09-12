@@ -64,7 +64,6 @@
     min-height: 100vh;
     background: var(--background);
     color: var(--foreground);
-    padding-top: 60px; /* Space for top bar */
   }
 
   .gradient-text {
