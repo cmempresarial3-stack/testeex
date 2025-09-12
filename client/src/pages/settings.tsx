@@ -269,57 +269,87 @@ export default function Settings() {
               </div>
               {settings.prayerAlarmEnabled && (
                 <div className="space-y-3 mt-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label className="text-xs text-muted-foreground">Horário da Manhã</Label>
-                      <Input 
-                        type="time" 
-                        value={settings.morningPrayerTime || '07:00'}
-                        onChange={(e) => setSettings({...settings, morningPrayerTime: e.target.value})}
-                        className="mt-1"
-                        data-testid="input-morning-prayer"
-                      />
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <Switch 
+                          checked={settings.morningPrayerEnabled || false}
+                          onCheckedChange={(checked) => setSettings({...settings, morningPrayerEnabled: checked})}
+                          data-testid="switch-morning-prayer"
+                        />
+                        <div>
+                          <Label className="text-sm font-medium">Alarme da Manhã</Label>
+                          <p className="text-xs text-muted-foreground">Lembrete matinal de oração</p>
+                        </div>
+                      </div>
+                      {settings.morningPrayerEnabled && (
+                        <Input 
+                          type="time" 
+                          value={settings.morningPrayerTime || '07:00'}
+                          onChange={(e) => setSettings({...settings, morningPrayerTime: e.target.value})}
+                          className="w-24"
+                          data-testid="input-morning-prayer"
+                        />
+                      )}
                     </div>
-                    <div>
-                      <Label className="text-xs text-muted-foreground">Horário da Noite</Label>
-                      <Input 
-                        type="time" 
-                        value={settings.eveningPrayerTime || '19:00'}
-                        onChange={(e) => setSettings({...settings, eveningPrayerTime: e.target.value})}
-                        className="mt-1"
-                        data-testid="input-evening-prayer"
-                      />
+                    
+                    <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <Switch 
+                          checked={settings.eveningPrayerEnabled || false}
+                          onCheckedChange={(checked) => setSettings({...settings, eveningPrayerEnabled: checked})}
+                          data-testid="switch-evening-prayer"
+                        />
+                        <div>
+                          <Label className="text-sm font-medium">Alarme da Noite</Label>
+                          <p className="text-xs text-muted-foreground">Lembrete noturno de oração</p>
+                        </div>
+                      </div>
+                      {settings.eveningPrayerEnabled && (
+                        <Input 
+                          type="time" 
+                          value={settings.eveningPrayerTime || '19:00'}
+                          onChange={(e) => setSettings({...settings, eveningPrayerTime: e.target.value})}
+                          className="w-24"
+                          data-testid="input-evening-prayer"
+                        />
+                      )}
                     </div>
                   </div>
-                  <div>
-                    <Label className="text-xs text-muted-foreground mb-2 block">Som do Alarme</Label>
-                    <select 
-                      value={settings.prayerAlarmSound || 'bell'}
-                      onChange={(e) => setSettings({...settings, prayerAlarmSound: e.target.value})}
-                      className="w-full p-2 border rounded-md bg-background text-sm"
-                      data-testid="select-prayer-sound"
-                    >
-                      <option value="bell">Sino Suave</option>
-                      <option value="chime">Carrilhão</option>
-                      <option value="nature">Sons da Natureza</option>
-                      <option value="worship">Música de Adoração</option>
-                      <option value="peaceful">Melodia Pacifica</option>
-                    </select>
-                  </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="w-full"
-                    data-testid="button-test-prayer-alarm"
-                  >
-                    Testar Som
-                  </Button>
+                  {(settings.morningPrayerEnabled || settings.eveningPrayerEnabled) && (
+                    <div className="space-y-3">
+                      <div>
+                        <Label className="text-xs text-muted-foreground mb-2 block">Som do Alarme</Label>
+                        <select 
+                          value={settings.prayerAlarmSound || 'bell'}
+                          onChange={(e) => setSettings({...settings, prayerAlarmSound: e.target.value})}
+                          className="w-full p-2 border rounded-md bg-background text-sm"
+                          data-testid="select-prayer-sound"
+                        >
+                          <option value="bell">Sino Suave</option>
+                          <option value="chime">Carrilhão</option>
+                          <option value="nature">Sons da Natureza</option>
+                          <option value="worship">Música de Adoração</option>
+                          <option value="peaceful">Melodia Pacifica</option>
+                        </select>
+                      </div>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="w-full"
+                        data-testid="button-test-prayer-alarm"
+                      >
+                        Testar Som
+                      </Button>
+                    </div>
+                  )}
                 </div>
               )}
             </CardContent>
           </Card>
 
           {/* Store Link */}
+          <div className="mt-4">
           <Link href="/store">
             <Card className="cursor-pointer hover:shadow-md transition-shadow">
               <CardContent className="p-4">
@@ -338,6 +368,7 @@ export default function Settings() {
               </CardContent>
             </Card>
           </Link>
+          </div>
 
           {/* Social Media */}
           <Card>
