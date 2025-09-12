@@ -80,14 +80,18 @@ export default function Devotional() {
               <div className="flex items-center justify-center mb-2">
                 <CalendarIcon className="w-5 h-5 text-primary mr-2" />
                 <span className="text-sm font-medium text-primary">
-                  {formatDate(currentDevotional.date)}
+                  {new Date().toLocaleDateString('pt-BR', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                  })}
                 </span>
               </div>
               <h1 className="text-2xl font-bold mb-2" data-testid="text-devotional-title">
                 {currentDevotional.title}
               </h1>
               <p className="text-muted-foreground">
-                {isToday ? `Bom dia, ${userName}!` : `Uma reflexão especial para você, ${userName}`}
+                De: Deus, Para: {userName}
               </p>
             </div>
 
@@ -116,6 +120,44 @@ export default function Devotional() {
               </div>
             </div>
 
+            {/* Navigation Buttons */}
+            <div className="flex items-center justify-between mt-6 mb-4">
+              <Button 
+                variant="outline" 
+                onClick={previousDevotional}
+                className="flex items-center space-x-2"
+                data-testid="button-previous-devotional"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                <span>Anterior</span>
+              </Button>
+
+              <div className="flex space-x-1">
+                {dailyDevotionals.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentIndex(index)}
+                    className={`w-2 h-2 rounded-full transition-colors ${
+                      index === currentIndex 
+                        ? 'bg-primary' 
+                        : 'bg-muted hover:bg-muted-foreground'
+                    }`}
+                    data-testid={`dot-${index}`}
+                  />
+                ))}
+              </div>
+
+              <Button 
+                variant="outline" 
+                onClick={nextDevotional}
+                className="flex items-center space-x-2"
+                data-testid="button-next-devotional"
+              >
+                <span>Próximo</span>
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
+
             {/* Reflection Questions */}
             <Card className="mt-6 bg-secondary/5 border-secondary/20">
               <CardContent className="p-4">
@@ -142,48 +184,6 @@ export default function Devotional() {
           </CardContent>
         </Card>
 
-        {/* Navigation */}
-        <div className="flex items-center justify-between">
-          <Button 
-            variant="outline" 
-            onClick={previousDevotional}
-            className="flex items-center space-x-2"
-            data-testid="button-previous-devotional"
-          >
-            <ChevronLeft className="w-4 h-4" />
-            <span>Anterior</span>
-          </Button>
-
-          <div className="text-center">
-            <p className="text-sm text-muted-foreground">
-              {currentIndex + 1} de {dailyDevotionals.length}
-            </p>
-            <div className="flex space-x-1 mt-1">
-              {dailyDevotionals.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentIndex(index)}
-                  className={`w-2 h-2 rounded-full transition-colors ${
-                    index === currentIndex 
-                      ? 'bg-primary' 
-                      : 'bg-muted hover:bg-muted-foreground'
-                  }`}
-                  data-testid={`dot-${index}`}
-                />
-              ))}
-            </div>
-          </div>
-
-          <Button 
-            variant="outline" 
-            onClick={nextDevotional}
-            className="flex items-center space-x-2"
-            data-testid="button-next-devotional"
-          >
-            <span>Próximo</span>
-            <ChevronRight className="w-4 h-4" />
-          </Button>
-        </div>
 
         {/* Call to Action */}
         <Card className="mt-6">

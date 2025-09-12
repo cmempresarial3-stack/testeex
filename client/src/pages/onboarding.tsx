@@ -48,13 +48,6 @@ export default function Onboarding() {
           
           <h1 className="text-3xl font-bold gradient-text mb-4">Verso & Paz</h1>
           <h1 className="text-2xl font-semibold mb-6">Você não está sozinho</h1>
-          <p className="text-muted-foreground text-lg mb-4">Viva com propósito</p>
-          <div className="p-4 bg-muted/50 rounded-lg mb-6">
-            <p className="text-sm text-muted-foreground">
-              Que bom ter você aqui! Este é o seu espaço para momentos com Deus, 
-              reflexões diárias e crescimento espiritual. Vamos começar?
-            </p>
-          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -73,14 +66,6 @@ export default function Onboarding() {
             />
           </div>
 
-          <div className="p-3 bg-muted/30 rounded-lg text-center">
-            <p className="text-sm text-muted-foreground mb-2">
-              💡 Você pode adicionar sua foto depois nas configurações, se quiser.
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Por enquanto, vamos começar sua jornada!
-            </p>
-          </div>
 
           <Button 
             type="submit"
