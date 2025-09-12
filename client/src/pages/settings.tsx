@@ -152,8 +152,34 @@ export default function Settings() {
                     Escolha uma opção para sua foto de perfil:
                   </p>
                   <div className="space-y-2">
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      className="hidden" 
+                      id="photo-upload"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file && user) {
+                          const reader = new FileReader();
+                          reader.onload = (event) => {
+                            const photoUrl = event.target?.result as string;
+                            setUser({ ...user, photo: photoUrl });
+                            setIsAddingPhoto(false);
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                    />
+                    <Button 
+                      onClick={() => document.getElementById('photo-upload')?.click()}
+                      className="w-full"
+                      data-testid="button-upload-photo"
+                    >
+                      Fazer Upload de Foto
+                    </Button>
                     <Button 
                       onClick={() => handleAddPhoto()}
+                      variant="outline"
                       className="w-full"
                       data-testid="button-generate-avatar"
                     >

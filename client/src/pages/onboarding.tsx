@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,16 @@ export default function Onboarding() {
   const [photo, setPhoto] = useState<string | undefined>();
   const { setUser } = useApp();
   const [, setLocation] = useLocation();
+
+  // Gerar avatar automaticamente quando o nome mudar
+  useEffect(() => {
+    if (name.trim()) {
+      const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(name.trim())}&background=3b82f6&color=fff&size=128`;
+      setPhoto(avatarUrl);
+    } else {
+      setPhoto(undefined);
+    }
+  }, [name]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,6 +61,21 @@ export default function Onboarding() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="text-center mb-6">
+            <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-primary flex items-center justify-center">
+              {photo ? (
+                <img src={photo} alt="Preview" className="w-24 h-24 rounded-full object-cover" />
+              ) : (
+                <span className="text-primary-foreground font-semibold text-lg">
+                  {name.charAt(0).toUpperCase() || '?'}
+                </span>
+              )}
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Seu avatar será gerado automaticamente
+            </p>
+          </div>
+          
           <div>
             <Label htmlFor="name" className="text-sm font-medium mb-2 block">
               Como podemos te chamar?

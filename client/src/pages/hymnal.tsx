@@ -135,10 +135,10 @@ export default function Hymnal() {
                       variant="ghost"
                       size="icon"
                       className="text-white hover:bg-white/20"
-                      onClick={() => toggleFavorite(currentHymn.number)}
+                      onClick={() => currentHymn && toggleFavorite(currentHymn.number)}
                       data-testid="button-favorite-hymn"
                     >
-                      <Heart className={`w-5 h-5 ${favorites.includes(currentHymn.number) ? 'fill-current' : ''}`} />
+                      <Heart className={`w-5 h-5 ${currentHymn && favorites.includes(currentHymn.number) ? 'fill-current' : ''}`} />
                     </Button>
                     <Button
                       size="icon"
@@ -169,33 +169,35 @@ export default function Hymnal() {
           )}
 
           {/* Hymn Lyrics */}
-          <Card className="mb-6">
-            <CardContent className="p-6">
-              <h4 className="font-bold text-lg mb-4 text-center" data-testid="text-hymn-title">
-                {currentHymn.title}
-              </h4>
-              <div className="space-y-4 text-center">
-                <div>
-                  {currentHymn.lyrics.map((line, index) => (
-                    <p key={index} className="mb-2">
-                      {line}
-                    </p>
-                  ))}
-                </div>
-                
-                {currentHymn.chorus && (
-                  <div className="font-semibold text-primary">
-                    <p className="mb-2">Coro:</p>
-                    {currentHymn.chorus.split('\n').map((line, index) => (
+          {currentHymn && (
+            <Card className="mb-6">
+              <CardContent className="p-6">
+                <h4 className="font-bold text-lg mb-4 text-center" data-testid="text-hymn-title">
+                  {currentHymn.title}
+                </h4>
+                <div className="space-y-4 text-center">
+                  <div>
+                    {currentHymn.lyrics.map((line, index) => (
                       <p key={index} className="mb-2">
                         {line}
                       </p>
                     ))}
                   </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+                  
+                  {currentHymn.chorus && (
+                    <div className="font-semibold text-primary">
+                      <p className="mb-2">Coro:</p>
+                      {currentHymn.chorus.split('\n').map((line, index) => (
+                        <p key={index} className="mb-2">
+                          {line}
+                        </p>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         {/* Hymn Lists with Tabs */}
