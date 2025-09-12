@@ -526,26 +526,18 @@ export default function Calendar() {
                   Olá, {userName}! 🙏
                 </div>
                 <p className="text-sm text-muted-foreground mb-2">
-                  Você visitou o app 3 dias consecutivos!
+                  Você visitou o app hoje!
                 </p>
                 <p className="text-sm font-medium text-primary">
                   Parabéns por buscar se aproximar mais de Deus! ✨
                 </p>
               </div>
               
-              <div className="grid grid-cols-2 gap-4">
-                <div className="text-center">
-                  <div className="text-xl font-bold text-primary">
-                    {events.filter(e => e.completed).length}
-                  </div>
-                  <p className="text-sm text-muted-foreground">Atividades Concluídas</p>
+              <div className="text-center">
+                <div className="text-xl font-bold text-secondary">
+                  1
                 </div>
-                <div className="text-center">
-                  <div className="text-xl font-bold text-secondary">
-                    3
-                  </div>
-                  <p className="text-sm text-muted-foreground">Dias Consecutivos</p>
-                </div>
+                <p className="text-sm text-muted-foreground">Dias Consecutivos</p>
               </div>
             </div>
           </CardContent>

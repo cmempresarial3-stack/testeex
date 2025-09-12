@@ -12,6 +12,7 @@ export default function HymnView() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const [hymn, setHymn] = useState<typeof hymns[0] | null>(null);
+  const [fontSize, setFontSize] = useState<'normal' | 'large' | 'extra-large'>('normal');
 
   useEffect(() => {
     const hymnNumber = parseInt(params.number || "0");
@@ -39,6 +40,17 @@ export default function HymnView() {
     
     localStorage.setItem('hymn-favorites', JSON.stringify(newFavorites));
     setIsFavorite(!isFavorite);
+  };
+
+  const toggleFontSize = () => {
+    setFontSize(current => {
+      switch (current) {
+        case 'normal': return 'large';
+        case 'large': return 'extra-large';
+        case 'extra-large': return 'normal';
+        default: return 'normal';
+      }
+    });
   };
 
   const handleShare = () => {
@@ -102,13 +114,21 @@ export default function HymnView() {
 
         {/* Hymn Header */}
         <div className="text-center mb-6">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
-            <span className="text-xl font-bold text-primary">{hymn.number}</span>
-          </div>
           <h1 className="text-2xl font-bold mb-2" data-testid="text-hymn-title">
             {hymn.title}
           </h1>
-          <p className="text-muted-foreground">Hino {hymn.number} - Harpa Cristã</p>
+          <div className="flex justify-center items-center space-x-2">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={toggleFontSize}
+              className="text-xs"
+              data-testid="button-font-size"
+              title="Ajustar tamanho da fonte"
+            >
+              Aa
+            </Button>
+          </div>
         </div>
 
         {/* Instrumental Player */}
@@ -149,7 +169,9 @@ export default function HymnView() {
         <Card>
           <CardContent className="p-6">
             <h3 className="font-bold text-lg mb-4 text-center">Letra</h3>
-            <div className="space-y-4 text-center leading-relaxed">
+            <div className={`space-y-4 text-center leading-relaxed transition-all duration-200 ${
+              fontSize === 'large' ? 'text-lg' : fontSize === 'extra-large' ? 'text-xl' : 'text-base'
+            }`}>
               {hymn.lyrics.map((line, index) => (
                 <p key={index} className="text-base">
                   {line}
@@ -160,7 +182,9 @@ export default function HymnView() {
                 <div className="mt-6 p-4 bg-primary/5 rounded-lg">
                   <p className="font-semibold text-primary mb-3">Coro:</p>
                   {hymn.chorus.split('\n').map((line, index) => (
-                    <p key={index} className="text-base text-primary/90 mb-2">
+                    <p key={index} className={`text-primary/90 mb-2 ${
+                      fontSize === 'large' ? 'text-lg' : fontSize === 'extra-large' ? 'text-xl' : 'text-base'
+                    }`}>
                       {line}
                     </p>
                   ))}

@@ -49,7 +49,6 @@ export default function Hymnal() {
     <MobileContainer>
       <div className="p-4 pb-24">
         <div className="mb-6">
-          <h2 className="text-2xl font-bold mb-4">Hinário Harpa Cristã</h2>
           
           {/* Background Music Section */}
           <Card className="mb-6">
@@ -126,7 +125,7 @@ export default function Hymnal() {
                     </div>
                     <div className="flex-1">
                       <h5 className="font-medium">{hymn.title}</h5>
-                      <p className="text-sm text-muted-foreground">Hino {hymn.number}</p>
+                      <p className="text-sm text-muted-foreground">{hymn.title}</p>
                     </div>
                     <Button
                       variant="ghost"
@@ -172,7 +171,7 @@ export default function Hymnal() {
                       </div>
                       <div className="flex-1">
                         <h5 className="font-medium">{hymn.title}</h5>
-                        <p className="text-sm text-muted-foreground">Hino {hymn.number}</p>
+                        <p className="text-sm text-muted-foreground">{hymn.title}</p>
                       </div>
                       <Button
                         variant="ghost"
@@ -216,7 +215,7 @@ export default function Hymnal() {
                       </div>
                       <div className="flex-1">
                         <h5 className="font-medium">{hymn.title}</h5>
-                        <p className="text-sm text-muted-foreground">Hino {hymn.number}</p>
+                        <p className="text-sm text-muted-foreground">{hymn.title}</p>
                       </div>
                       <Button
                         variant="ghost"
