@@ -4,6 +4,7 @@ export class NotificationService {
   private permission: NotificationPermission = 'default';
   private quizScheduleKey = 'quiz-schedule';
   private lastQuizKey = 'last-quiz-sent';
+  private activeTimers: number[] = [];
 
   static getInstance(): NotificationService {
     if (!NotificationService.instance) {
@@ -23,7 +24,8 @@ export class NotificationService {
   }
 
   getPermissionStatus(): NotificationPermission {
-    return this.permission;
+    // Always read fresh from the browser
+    return ('Notification' in window) ? Notification.permission : 'denied';
   }
 
   // Schedule quiz notifications every 3 days
@@ -31,7 +33,7 @@ export class NotificationService {
     // Clear existing timers
     this.clearScheduledNotifications();
 
-    if (!enabled || this.permission !== 'granted') {
+    if (!enabled || this.getPermissionStatus() !== 'granted') {
       return;
     }
 
@@ -49,11 +51,13 @@ export class NotificationService {
         localStorage.setItem(this.lastQuizKey, now.toISOString());
         
         // Schedule next notification in 3 days
-        setTimeout(scheduleNextQuiz, 3 * 24 * 60 * 60 * 1000);
+        const timerId = setTimeout(scheduleNextQuiz, 3 * 24 * 60 * 60 * 1000);
+        this.activeTimers.push(timerId);
       } else {
         // Schedule for remaining time
         const remainingMs = (3 - daysDiff) * 24 * 60 * 60 * 1000;
-        setTimeout(scheduleNextQuiz, remainingMs);
+        const timerId = setTimeout(scheduleNextQuiz, remainingMs);
+        this.activeTimers.push(timerId);
       }
     };
 
@@ -63,11 +67,14 @@ export class NotificationService {
   }
 
   private clearScheduledNotifications(): void {
+    // Cancel all active timers
+    this.activeTimers.forEach(timerId => clearTimeout(timerId));
+    this.activeTimers = [];
     localStorage.removeItem(this.quizScheduleKey);
   }
 
   sendQuizNotification(userName: string): void {
-    if (this.permission !== 'granted') {
+    if (this.getPermissionStatus() !== 'granted') {
       return;
     }
 
@@ -106,7 +113,7 @@ export class NotificationService {
 
   // For testing purposes - send notification immediately
   sendTestQuizNotification(userName: string): void {
-    if (this.permission === 'granted') {
+    if (this.getPermissionStatus() === 'granted') {
       this.sendQuizNotification(userName);
     }
   }

@@ -34,7 +34,6 @@ function AppContent() {
         <Route path="/notes" component={Notes} />
         <Route path="/store" component={Store} />
         <Route path="/settings" component={Settings} />
-        <Route path="/quiz" component={Quiz} />
         <Route path="/calendar" component={Calendar} />
         <Route path="/devotional" component={Devotional} />
         <Route path="/checkout" component={Checkout} />
