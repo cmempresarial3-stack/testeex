@@ -85,7 +85,7 @@ export default function Home() {
         {/* Main Actions Grid */}
         <div className="grid grid-cols-2 gap-4 mb-6">
           <Link href="/bible">
-            <Card className="hover:shadow-md transition-shadow cursor-pointer" data-testid="card-bible">
+            <Card className="card-hover cursor-pointer shadow-sophisticated" data-testid="card-bible">
               <CardContent className="p-6 text-center">
                 <BookOpen className="w-8 h-8 text-primary mb-3 mx-auto" />
                 <h4 className="font-semibold">Bíblia</h4>
@@ -95,7 +95,7 @@ export default function Home() {
           </Link>
 
           <Link href="/hymnal">
-            <Card className="hover:shadow-md transition-shadow cursor-pointer" data-testid="card-hymnal">
+            <Card className="card-hover cursor-pointer shadow-sophisticated" data-testid="card-hymnal">
               <CardContent className="p-6 text-center">
                 <Music className="w-8 h-8 text-secondary mb-3 mx-auto" />
                 <h4 className="font-semibold">Hinário</h4>
@@ -105,7 +105,7 @@ export default function Home() {
           </Link>
 
           <Link href="/notes">
-            <Card className="hover:shadow-md transition-shadow cursor-pointer" data-testid="card-notes">
+            <Card className="card-hover cursor-pointer shadow-sophisticated" data-testid="card-notes">
               <CardContent className="p-6 text-center">
                 <StickyNote className="w-8 h-8 text-accent mb-3 mx-auto" />
                 <h4 className="font-semibold">Anotações</h4>
@@ -115,7 +115,7 @@ export default function Home() {
           </Link>
 
           <Link href="/calendar">
-            <Card className="hover:shadow-md transition-shadow cursor-pointer" data-testid="card-calendar">
+            <Card className="card-hover cursor-pointer shadow-sophisticated" data-testid="card-calendar">
               <CardContent className="p-6 text-center">
                 <Calendar className="w-8 h-8 text-primary mb-3 mx-auto" />
                 <h4 className="font-semibold">Calendário</h4>
@@ -126,20 +126,18 @@ export default function Home() {
         </div>
 
         {/* Store Section */}
-        <Card className="mb-8 shadow-sm">
+        <Card className="mb-8 shadow-sm bg-gradient-to-r from-secondary/10 to-primary/10 border-primary/20">
           <CardContent className="p-4">
             <div className="flex items-center space-x-4">
-              <img 
-                src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100" 
-                alt="Christian products" 
-                className="w-16 h-16 rounded-lg object-cover" 
-              />
+              <div className="w-16 h-16 rounded-lg bg-gradient-to-r from-primary to-secondary flex items-center justify-center">
+                <Store className="w-8 h-8 text-white" />
+              </div>
               <div className="flex-1">
-                <h4 className="font-semibold">Conheça nossa loja</h4>
-                <p className="text-sm text-muted-foreground">Produtos que fortalecem sua fé</p>
+                <h4 className="font-semibold">Loja Verso & Paz</h4>
+                <p className="text-sm text-muted-foreground">Produtos especiais que fortalecem sua fé</p>
                 <Link href="/store">
-                  <Button variant="ghost" size="sm" className="p-0 h-auto text-primary mt-1" data-testid="link-store">
-                    Ver produtos →
+                  <Button variant="ghost" size="sm" className="p-0 h-auto text-primary mt-1 font-medium" data-testid="link-store">
+                    Explorar agora →
                   </Button>
                 </Link>
               </div>
