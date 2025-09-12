@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Calendar as CalendarIcon, Plus, Clock, Bell, Target, ChevronLeft, ChevronRight } from "lucide-react";
+import { Calendar as CalendarIcon, Plus, Clock, Bell, Target, ChevronLeft, ChevronRight, Edit2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -55,6 +55,8 @@ export default function Calendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [events, setEvents] = useState<CalendarEvent[]>(mockEvents);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
   const [newEvent, setNewEvent] = useState({
     title: "",
     description: "",
@@ -100,17 +102,35 @@ export default function Calendar() {
     
     if (!newEvent.title.trim()) return;
 
-    const event: CalendarEvent = {
-      id: Date.now().toString(),
-      title: newEvent.title,
-      description: newEvent.description,
-      date: newEvent.date,
-      time: newEvent.time,
-      type: newEvent.type,
-      completed: false
-    };
+    if (editingEvent) {
+      // Editing existing event
+      setEvents(events.map(event => 
+        event.id === editingEvent.id 
+          ? {
+              ...event,
+              title: newEvent.title,
+              description: newEvent.description,
+              date: newEvent.date,
+              time: newEvent.time,
+              type: newEvent.type
+            }
+          : event
+      ));
+      setEditingEvent(null);
+    } else {
+      // Creating new event
+      const event: CalendarEvent = {
+        id: Date.now().toString(),
+        title: newEvent.title,
+        description: newEvent.description,
+        date: newEvent.date,
+        time: newEvent.time,
+        type: newEvent.type,
+        completed: false
+      };
+      setEvents([...events, event]);
+    }
 
-    setEvents([...events, event]);
     setNewEvent({
       title: "",
       description: "",
@@ -119,6 +139,41 @@ export default function Calendar() {
       type: "reminder"
     });
     setIsDialogOpen(false);
+  };
+
+  const handleEditEvent = (event: CalendarEvent) => {
+    setEditingEvent(event);
+    setNewEvent({
+      title: event.title,
+      description: event.description,
+      date: event.date,
+      time: event.time,
+      type: event.type
+    });
+    setIsDialogOpen(true);
+  };
+
+  const handleDeleteEvent = (eventId: string) => {
+    if (confirm('Tem certeza que deseja deletar este evento?')) {
+      setEvents(events.filter(event => event.id !== eventId));
+    }
+  };
+
+  const handleDayClick = (day: number) => {
+    const dateStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    const dayEvents = getEventsForDay(day);
+    if (dayEvents.length > 0) {
+      setSelectedDate(dateStr);
+    }
+  };
+
+  const getMonthEvents = () => {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    return events.filter(event => {
+      const eventDate = new Date(event.date);
+      return eventDate.getFullYear() === year && eventDate.getMonth() === month;
+    });
   };
 
   const toggleEventCompletion = (eventId: string) => {
@@ -155,7 +210,19 @@ export default function Calendar() {
             <p className="text-muted-foreground">Organize sua jornada de fé, {userName}</p>
           </div>
           
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <Dialog open={isDialogOpen} onOpenChange={(open) => {
+            setIsDialogOpen(open);
+            if (!open) {
+              setEditingEvent(null);
+              setNewEvent({
+                title: "",
+                description: "",
+                date: new Date().toISOString().split('T')[0],
+                time: "19:00",
+                type: "reminder"
+              });
+            }
+          }}>
             <DialogTrigger asChild>
               <Button size="icon" data-testid="button-create-event">
                 <Plus className="w-4 h-4" />
@@ -163,7 +230,7 @@ export default function Calendar() {
             </DialogTrigger>
             <DialogContent className="max-w-[95vw] w-full mx-auto">
               <DialogHeader>
-                <DialogTitle>Novo Lembrete</DialogTitle>
+                <DialogTitle>{editingEvent ? 'Editar Evento' : 'Novo Lembrete'}</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
@@ -274,6 +341,7 @@ export default function Calendar() {
                     className={`p-2 text-center text-sm cursor-pointer hover:bg-muted rounded ${
                       isToday(day) ? 'bg-primary text-primary-foreground font-bold' : ''
                     }`}
+                    onClick={() => handleDayClick(day)}
                     data-testid={`calendar-day-${day}`}
                   >
                     <div>{day}</div>
@@ -343,8 +411,101 @@ export default function Calendar() {
                           {event.time} • {event.description}
                         </p>
                       </div>
+                      
+                      <div className="flex items-center space-x-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleEditEvent(event)}
+                          className="w-8 h-8"
+                          data-testid={`button-edit-${event.id}`}
+                        >
+                          <Edit2 className="w-3 h-3" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDeleteEvent(event.id)}
+                          className="w-8 h-8 text-destructive hover:text-destructive"
+                          data-testid={`button-delete-${event.id}`}
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      </div>
                     </div>
                   ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Events of the Month */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center text-lg">
+              <CalendarIcon className="w-5 h-5 mr-2 text-primary" />
+              Eventos do Mês
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {getMonthEvents().length === 0 ? (
+              <p className="text-muted-foreground text-center py-4">
+                Nenhum evento agendado para este mês
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {getMonthEvents().slice(0, 5).map(event => {
+                  const eventDate = new Date(event.date);
+                  const dayOfMonth = eventDate.getDate();
+                  return (
+                    <div 
+                      key={event.id} 
+                      className={`flex items-center space-x-3 p-3 rounded-lg border ${
+                        event.completed ? 'bg-muted/50 opacity-75' : 'bg-card'
+                      }`}
+                      data-testid={`monthly-event-${event.id}`}
+                    >
+                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                        <span className="text-sm font-bold text-primary">{dayOfMonth}</span>
+                      </div>
+                      
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2 mb-1">
+                          <h4 className={`font-medium ${event.completed ? 'line-through' : ''}`}>
+                            {event.title}
+                          </h4>
+                          <Badge className={getTypeColor(event.type)}>
+                            {getTypeLabel(event.type)}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {event.time} • {event.description}
+                        </p>
+                      </div>
+                      
+                      <div className="flex items-center space-x-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleEditEvent(event)}
+                          className="w-8 h-8"
+                          data-testid={`button-edit-monthly-${event.id}`}
+                        >
+                          <Edit2 className="w-3 h-3" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDeleteEvent(event.id)}
+                          className="w-8 h-8 text-destructive hover:text-destructive"
+                          data-testid={`button-delete-monthly-${event.id}`}
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </CardContent>
@@ -359,34 +520,112 @@ export default function Calendar() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-primary">
-                  {events.filter(e => e.completed).length}
+            <div className="space-y-4">
+              <div className="text-center p-4 bg-primary/5 rounded-lg">
+                <div className="text-2xl font-bold text-primary mb-2">
+                  Olá, {userName}! 🙏
                 </div>
-                <p className="text-sm text-muted-foreground">Atividades Concluídas</p>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Você visitou o app 3 dias consecutivos!
+                </p>
+                <p className="text-sm font-medium text-primary">
+                  Parabéns por buscar se aproximar mais de Deus! ✨
+                </p>
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-secondary">
-                  {Math.round((events.filter(e => e.completed).length / Math.max(events.length, 1)) * 100)}%
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="text-center">
+                  <div className="text-xl font-bold text-primary">
+                    {events.filter(e => e.completed).length}
+                  </div>
+                  <p className="text-sm text-muted-foreground">Atividades Concluídas</p>
                 </div>
-                <p className="text-sm text-muted-foreground">Taxa de Conclusão</p>
-              </div>
-            </div>
-            
-            <div className="mt-4">
-              <p className="text-sm text-muted-foreground mb-2">Progresso do mês</p>
-              <div className="w-full bg-muted rounded-full h-2">
-                <div 
-                  className="bg-primary h-2 rounded-full transition-all duration-300"
-                  style={{ 
-                    width: `${Math.round((events.filter(e => e.completed).length / Math.max(events.length, 1)) * 100)}%` 
-                  }}
-                />
+                <div className="text-center">
+                  <div className="text-xl font-bold text-secondary">
+                    3
+                  </div>
+                  <p className="text-sm text-muted-foreground">Dias Consecutivos</p>
+                </div>
               </div>
             </div>
           </CardContent>
         </Card>
+        {/* Day Events Dialog */}
+        <Dialog open={!!selectedDate} onOpenChange={() => setSelectedDate(null)}>
+          <DialogContent className="max-w-[95vw] w-full mx-auto">
+            <DialogHeader>
+              <DialogTitle>
+                Eventos de {selectedDate && new Date(selectedDate + 'T00:00:00').toLocaleDateString('pt-BR')}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3">
+              {selectedDate && getEventsForDay(new Date(selectedDate + 'T00:00:00').getDate()).map(event => (
+                <div 
+                  key={event.id} 
+                  className={`flex items-center space-x-3 p-3 rounded-lg border ${
+                    event.completed ? 'bg-muted/50 opacity-75' : 'bg-card'
+                  }`}
+                  data-testid={`day-event-${event.id}`}
+                >
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => toggleEventCompletion(event.id)}
+                    className={`w-6 h-6 rounded-full border-2 ${
+                      event.completed 
+                        ? 'bg-green-500 border-green-500 text-white' 
+                        : 'border-muted-foreground hover:border-primary'
+                    }`}
+                    data-testid={`button-toggle-day-${event.id}`}
+                  >
+                    {event.completed && <span className="text-xs">✓</span>}
+                  </Button>
+                  
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2 mb-1">
+                      <h4 className={`font-medium ${event.completed ? 'line-through' : ''}`}>
+                        {event.title}
+                      </h4>
+                      <Badge className={getTypeColor(event.type)}>
+                        {getTypeLabel(event.type)}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {event.time} • {event.description}
+                    </p>
+                  </div>
+                  
+                  <div className="flex items-center space-x-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        setSelectedDate(null);
+                        handleEditEvent(event);
+                      }}
+                      className="w-8 h-8"
+                      data-testid={`button-edit-day-${event.id}`}
+                    >
+                      <Edit2 className="w-3 h-3" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        setSelectedDate(null);
+                        handleDeleteEvent(event.id);
+                      }}
+                      className="w-8 h-8 text-destructive hover:text-destructive"
+                      data-testid={`button-delete-day-${event.id}`}
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </MobileContainer>
   );
