@@ -9,27 +9,22 @@ import { hymns, searchHymns } from "@/data/hymns";
 
 export default function Hymnal() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [currentHymn, setCurrentHymn] = useState(hymns.find(h => h.number === 15) || hymns[0]);
+  const [currentHymn, setCurrentHymn] = useState<typeof hymns[0] | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [backgroundMusicPlaying, setBackgroundMusicPlaying] = useState(true);
-  const [hymnNumber, setHymnNumber] = useState("");
-  const [favorites, setFavorites] = useState<number[]>([1, 15, 30]);
-  const [recentHymns, setRecentHymns] = useState<number[]>([15, 5, 12]);
-  const [searchMethod, setSearchMethod] = useState<'number' | 'list'>('list');
+  const [favorites, setFavorites] = useState<number[]>([1, 30, 45]);
+  const [recentHymns, setRecentHymns] = useState<number[]>([5, 12, 25]);
+  const [showBackgroundMusic, setShowBackgroundMusic] = useState(false);
 
   const filteredHymns = searchQuery ? searchHymns(searchQuery) : hymns;
   const favoriteHymns = hymns.filter(h => favorites.includes(h.number));
   const recentHymnsList = hymns.filter(h => recentHymns.includes(h.number));
 
-  const selectHymnByNumber = () => {
-    const num = parseInt(hymnNumber);
-    const hymn = hymns.find(h => h.number === num);
-    if (hymn) {
-      setCurrentHymn(hymn);
-      // Add to recent if not already there
-      if (!recentHymns.includes(num)) {
-        setRecentHymns([num, ...recentHymns.slice(0, 4)]);
-      }
+  const selectHymn = (hymn: typeof hymns[0]) => {
+    setCurrentHymn(hymn);
+    // Add to recent if not already there
+    if (!recentHymns.includes(hymn.number)) {
+      setRecentHymns([hymn.number, ...recentHymns.slice(0, 4)]);
     }
   };
 
@@ -40,6 +35,14 @@ export default function Hymnal() {
       setFavorites([hymnNumber, ...favorites]);
     }
   };
+
+  const backgroundMusicList = [
+    { id: 1, title: "Paz do Senhor", duration: "4:32" },
+    { id: 2, title: "Suave Oração", duration: "3:45" },
+    { id: 3, title: "Comunhão com Deus", duration: "5:12" },
+    { id: 4, title: "Serenidade", duration: "4:18" },
+    { id: 5, title: "Reflexão Divina", duration: "3:58" }
+  ];
 
   return (
     <MobileContainer>
@@ -58,6 +61,14 @@ export default function Hymnal() {
                 <div className="flex items-center space-x-2">
                   <Button
                     variant="ghost"
+                    size="sm"
+                    onClick={() => setShowBackgroundMusic(!showBackgroundMusic)}
+                    data-testid="button-background-music-list"
+                  >
+                    {showBackgroundMusic ? 'Ocultar' : 'Ver Lista'}
+                  </Button>
+                  <Button
+                    variant="ghost"
                     size="icon"
                     onClick={() => setBackgroundMusicPlaying(!backgroundMusicPlaying)}
                     data-testid="button-background-music"
@@ -73,112 +84,89 @@ export default function Hymnal() {
                   </Button>
                 </div>
               </div>
+              
+              {showBackgroundMusic && (
+                <div className="mt-4 space-y-2">
+                  <h6 className="font-medium text-sm">Músicas Disponíveis:</h6>
+                  {backgroundMusicList.map((music) => (
+                    <div key={music.id} className="flex items-center justify-between p-2 bg-muted/30 rounded-lg">
+                      <div>
+                        <p className="font-medium text-sm">{music.title}</p>
+                        <p className="text-xs text-muted-foreground">{music.duration}</p>
+                      </div>
+                      <Button variant="ghost" size="icon" data-testid={`button-play-music-${music.id}`}>
+                        <Play className="w-4 h-4 text-primary" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
 
-          {/* Hymn Selection Method */}
-          <div className="flex space-x-2 mb-4">
-            <Button
-              variant={searchMethod === 'number' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setSearchMethod('number')}
-              data-testid="button-search-by-number"
-            >
-              <Hash className="w-4 h-4 mr-2" />
-              Por Número
-            </Button>
-            <Button
-              variant={searchMethod === 'list' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setSearchMethod('list')}
-              data-testid="button-search-by-list"
-            >
-              <List className="w-4 h-4 mr-2" />
-              Por Lista
-            </Button>
+          {/* Search Input */}
+          <div className="relative mb-4">
+            <Input
+              type="text"
+              placeholder="Buscar por nome ou número do hino..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+              data-testid="input-hymn-search"
+            />
+            <Search className="w-4 h-4 absolute left-3 top-3.5 text-muted-foreground" />
           </div>
 
-          {/* Search/Number Input */}
-          {searchMethod === 'number' ? (
-            <div className="flex space-x-2 mb-4">
-              <Input
-                type="number"
-                placeholder="Digite o número do hino..."
-                value={hymnNumber}
-                onChange={(e) => setHymnNumber(e.target.value)}
-                className="flex-1"
-                data-testid="input-hymn-number"
-              />
-              <Button 
-                onClick={selectHymnByNumber}
-                disabled={!hymnNumber}
-                data-testid="button-select-hymn"
-              >
-                Buscar
-              </Button>
-            </div>
-          ) : (
-            <div className="relative mb-4">
-              <Input
-                type="text"
-                placeholder="Buscar hinos..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-                data-testid="input-hymn-search"
-              />
-              <Search className="w-4 h-4 absolute left-3 top-3.5 text-muted-foreground" />
-            </div>
-          )}
-
           {/* Current Hymn Player */}
-          <Card className="hymn-player text-white mb-6">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h3 className="text-xl font-bold" data-testid="text-current-hymn-number">
-                    Hino {currentHymn.number}
-                  </h3>
-                  <p className="opacity-90" data-testid="text-current-hymn-title">
-                    {currentHymn.title}
-                  </p>
+          {currentHymn && (
+            <Card className="hymn-player text-white mb-6">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="text-xl font-bold" data-testid="text-current-hymn-number">
+                      Hino {currentHymn.number}
+                    </h3>
+                    <p className="opacity-90" data-testid="text-current-hymn-title">
+                      {currentHymn.title}
+                    </p>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-white hover:bg-white/20"
+                      onClick={() => toggleFavorite(currentHymn.number)}
+                      data-testid="button-favorite-hymn"
+                    >
+                      <Heart className={`w-5 h-5 ${favorites.includes(currentHymn.number) ? 'fill-current' : ''}`} />
+                    </Button>
+                    <Button
+                      size="icon"
+                      className="w-12 h-12 rounded-full bg-white/20 hover:bg-white/30"
+                      onClick={() => setIsPlaying(!isPlaying)}
+                      data-testid="button-play-hymn"
+                    >
+                      {isPlaying ? (
+                        <Pause className="w-5 h-5" />
+                      ) : (
+                        <Play className="w-5 h-5" />
+                      )}
+                    </Button>
+                  </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-white hover:bg-white/20"
-                    onClick={() => toggleFavorite(currentHymn.number)}
-                    data-testid="button-favorite-hymn"
-                  >
-                    <Heart className={`w-5 h-5 ${favorites.includes(currentHymn.number) ? 'fill-current' : ''}`} />
-                  </Button>
-                  <Button
-                    size="icon"
-                    className="w-12 h-12 rounded-full bg-white/20 hover:bg-white/30"
-                    onClick={() => setIsPlaying(!isPlaying)}
-                    data-testid="button-play-hymn"
-                  >
-                    {isPlaying ? (
-                      <Pause className="w-5 h-5" />
-                    ) : (
-                      <Play className="w-5 h-5" />
-                    )}
-                  </Button>
+                
+                {/* Progress Bar */}
+                <div className="w-full bg-white/20 rounded-full h-2 mb-4">
+                  <div className="bg-white h-2 rounded-full" style={{ width: "35%" }} />
                 </div>
-              </div>
-              
-              {/* Progress Bar */}
-              <div className="w-full bg-white/20 rounded-full h-2 mb-4">
-                <div className="bg-white h-2 rounded-full" style={{ width: "35%" }} />
-              </div>
-              
-              <div className="flex items-center justify-between text-sm opacity-90">
-                <span>1:23</span>
-                <span>3:45</span>
-              </div>
-            </CardContent>
-          </Card>
+                
+                <div className="flex items-center justify-between text-sm opacity-90">
+                  <span>1:23</span>
+                  <span>3:45</span>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Hymn Lyrics */}
           <Card className="mb-6">
@@ -211,11 +199,11 @@ export default function Hymnal() {
         </div>
 
         {/* Hymn Lists with Tabs */}
-        <Tabs defaultValue="all" className="w-full">
+        <Tabs defaultValue="recent" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="recent">Recentes</TabsTrigger>
             <TabsTrigger value="all">Todos</TabsTrigger>
             <TabsTrigger value="favorites">Favoritos</TabsTrigger>
-            <TabsTrigger value="recent">Recentes</TabsTrigger>
           </TabsList>
           
           <TabsContent value="all" className="mt-4">
@@ -228,13 +216,7 @@ export default function Hymnal() {
                 <Card 
                   key={hymn.id}
                   className="cursor-pointer hover:shadow-md transition-shadow"
-                  onClick={() => {
-                    setCurrentHymn(hymn);
-                    // Add to recent
-                    if (!recentHymns.includes(hymn.number)) {
-                      setRecentHymns([hymn.number, ...recentHymns.slice(0, 4)]);
-                    }
-                  }}
+                  onClick={() => selectHymn(hymn)}
                   data-testid={`card-hymn-${hymn.number}`}
                 >
                   <CardContent className="flex items-center p-3">
