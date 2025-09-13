@@ -165,11 +165,9 @@ export default function Hymnal() {
                     data-testid={`card-favorite-hymn-${hymn.number}`}
                   >
                     <CardContent className="flex items-center p-3">
-                      <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center mr-3">
-                        <span className="text-sm font-bold text-red-600">
-                          {hymn.number.toString().padStart(2, '0')}
-                        </span>
-                      </div>
+                      <span className="text-sm font-bold text-red-600 mr-3 min-w-[24px]">
+                        {hymn.number.toString().padStart(2, '0')}
+                      </span>
                       <div className="flex-1">
                         <h5 className="font-medium">{hymn.title}</h5>
                         <p className="text-sm text-muted-foreground">{hymn.title}</p>
@@ -177,10 +175,13 @@ export default function Hymnal() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="text-primary"
-                        data-testid={`button-play-favorite-${hymn.number}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleFavorite(hymn.number);
+                        }}
+                        data-testid={`button-favorite-${hymn.number}`}
                       >
-                        <Play className="w-4 h-4" />
+                        <Heart className={`w-4 h-4 ${favorites.includes(hymn.number) ? 'fill-current text-red-500' : 'text-muted-foreground'}`} />
                       </Button>
                     </CardContent>
                   </Card>
@@ -209,11 +210,9 @@ export default function Hymnal() {
                     data-testid={`card-recent-hymn-${hymn.number}`}
                   >
                     <CardContent className="flex items-center p-3">
-                      <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
-                        <span className="text-sm font-bold text-blue-600">
-                          {hymn.number.toString().padStart(2, '0')}
-                        </span>
-                      </div>
+                      <span className="text-sm font-bold text-blue-600 mr-3 min-w-[24px]">
+                        {hymn.number.toString().padStart(2, '0')}
+                      </span>
                       <div className="flex-1">
                         <h5 className="font-medium">{hymn.title}</h5>
                         <p className="text-sm text-muted-foreground">{hymn.title}</p>
@@ -221,10 +220,13 @@ export default function Hymnal() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="text-primary"
-                        data-testid={`button-play-recent-${hymn.number}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleFavorite(hymn.number);
+                        }}
+                        data-testid={`button-favorite-recent-${hymn.number}`}
                       >
-                        <Play className="w-4 h-4" />
+                        <Heart className={`w-4 h-4 ${favorites.includes(hymn.number) ? 'fill-current text-red-500' : 'text-muted-foreground'}`} />
                       </Button>
                     </CardContent>
                   </Card>
