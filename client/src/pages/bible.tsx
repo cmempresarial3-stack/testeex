@@ -60,6 +60,7 @@ export default function Bible() {
   const [fontSize, setFontSize] = useState<'normal' | 'large' | 'extra-large'>('normal');
   const [highlightedVerses, setHighlightedVerses] = useState<{[key: string]: 'yellow' | 'green' | 'blue' | null}>({});
   const [showHighlightOptions, setShowHighlightOptions] = useState<number | null>(null);
+  const [rangeStart, setRangeStart] = useState<number | null>(null);
 
   useEffect(() => {
     // Convert array format to object format for easier access
@@ -143,12 +144,52 @@ export default function Bible() {
   };
 
   const highlightVerse = (verseNumber: number, color: 'yellow' | 'green' | 'blue' | null) => {
-    const verseKey = `${currentBookAbbrev}-${currentChapter}-${verseNumber}`;
-    setHighlightedVerses(prev => ({
-      ...prev,
-      [verseKey]: color
-    }));
+    if (rangeStart !== null && rangeStart !== verseNumber) {
+      // Destacar intervalo
+      const start = Math.min(rangeStart, verseNumber);
+      const end = Math.max(rangeStart, verseNumber);
+      
+      const updates: {[key: string]: 'yellow' | 'green' | 'blue' | null} = {};
+      for (let i = start; i <= end; i++) {
+        const verseKey = `${currentBookAbbrev}-${currentChapter}-${i}`;
+        updates[verseKey] = color;
+      }
+      
+      setHighlightedVerses(prev => ({
+        ...prev,
+        ...updates
+      }));
+      
+      setRangeStart(null);
+    } else {
+      // Destacar apenas um versículo
+      const verseKey = `${currentBookAbbrev}-${currentChapter}-${verseNumber}`;
+      setHighlightedVerses(prev => ({
+        ...prev,
+        [verseKey]: color
+      }));
+      
+      if (color && rangeStart === null) {
+        // Se está aplicando uma cor e não há intervalo ativo, marcar como início
+        setRangeStart(verseNumber);
+      }
+    }
+    
     setShowHighlightOptions(null);
+  };
+
+  const handleVerseClick = (verseNumber: number) => {
+    if (rangeStart !== null && rangeStart !== verseNumber) {
+      // Se há um início de intervalo, mostrar opções para destacar o intervalo
+      setShowHighlightOptions(verseNumber);
+    } else if (rangeStart === verseNumber) {
+      // Se clicou no mesmo versículo que é o início, cancelar intervalo
+      setRangeStart(null);
+      setShowHighlightOptions(verseNumber);
+    } else {
+      // Clique normal
+      setShowHighlightOptions(showHighlightOptions === verseNumber ? null : verseNumber);
+    }
   };
 
   const getVerseHighlight = (verseNumber: number) => {
@@ -286,8 +327,11 @@ export default function Bible() {
           )}
 
 
-          {/* Font Size Control */}
-          <div className="flex justify-end mb-2">
+          {/* Font Size Control and Tips */}
+          <div className="flex justify-between items-center mb-2">
+            <div className="text-xs text-muted-foreground">
+              💡 Clique em um versículo para destacar. Para marcar múltiplos, escolha uma cor primeiro.
+            </div>
             <Button 
               variant="ghost" 
               size="sm" 
@@ -310,13 +354,14 @@ export default function Bible() {
                   const highlightClass = highlight === 'yellow' ? 'bg-yellow-200 dark:bg-yellow-800' : 
                                        highlight === 'green' ? 'bg-green-200 dark:bg-green-800' :
                                        highlight === 'blue' ? 'bg-blue-200 dark:bg-blue-800' : '';
+                  const rangeStartClass = rangeStart === verseNumber ? 'ring-2 ring-primary' : '';
                   
                   return (
                     <div key={verseNumber} className="relative">
                       <p 
-                        className={`mb-4 cursor-pointer hover:bg-muted/20 p-2 rounded ${fontClass} ${highlightClass}`} 
+                        className={`mb-4 cursor-pointer hover:bg-muted/20 p-2 rounded transition-all ${fontClass} ${highlightClass} ${rangeStartClass}`} 
                         data-testid={`verse-${verseNumber}`}
-                        onClick={() => setShowHighlightOptions(showHighlightOptions === verseNumber ? null : verseNumber)}
+                        onClick={() => handleVerseClick(verseNumber)}
                       >
                         <span className="text-primary font-semibold mr-2">{verseNumber}</span>
                         {verseText}
