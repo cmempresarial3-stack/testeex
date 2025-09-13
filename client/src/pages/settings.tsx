@@ -232,37 +232,49 @@ export default function Settings() {
 
         {/* Settings Options */}
         <div className="space-y-4">
-          {/* Theme Selection */}
+          {/* Theme Mode */}
           <Card>
             <CardContent className="p-4">
-              <div className="mb-4">
+              <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center">
                   <Moon className="w-5 h-5 text-primary mr-3" />
                   <h4 className="font-semibold">Modo do Tema</h4>
                 </div>
-                <p className="text-sm text-muted-foreground mt-1">Escolha a cor do aplicativo</p>
+                <Switch 
+                  checked={theme !== 'light'}
+                  onCheckedChange={(checked) => {
+                    if (!checked) {
+                      changeTheme('light');
+                    }
+                  }}
+                  data-testid="switch-theme-mode"
+                />
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                {Object.entries(THEMES).map(([themeKey, themeName]) => (
-                  <Button
-                    key={themeKey}
-                    variant={theme === themeKey ? "default" : "outline"}
-                    onClick={() => changeTheme(themeKey as Theme)}
-                    className="h-12 flex items-center justify-center"
-                    data-testid={`button-theme-${themeKey}`}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <div className={`w-4 h-4 rounded-full ${
-                        themeKey === 'light' ? 'bg-gray-200 border border-gray-400' :
-                        themeKey === 'dark' ? 'bg-gray-800' :
-                        themeKey === 'pink' ? 'bg-pink-400' :
-                        'bg-blue-400'
-                      }`}></div>
-                      <span className="text-sm">{themeName}</span>
-                    </div>
-                  </Button>
-                ))}
-              </div>
+              {theme !== 'light' && (
+                <div className="space-y-3 mt-4">
+                  <p className="text-sm text-muted-foreground mb-3">Escolha a cor do aplicativo:</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    {Object.entries(THEMES).filter(([key]) => key !== 'light').map(([themeKey, themeName]) => (
+                      <Button
+                        key={themeKey}
+                        variant={theme === themeKey ? "default" : "outline"}
+                        onClick={() => changeTheme(themeKey as Theme)}
+                        className="h-12 flex items-center justify-center"
+                        data-testid={`button-theme-${themeKey}`}
+                      >
+                        <div className="flex items-center space-x-2">
+                          <div className={`w-4 h-4 rounded-full ${
+                            themeKey === 'dark' ? 'bg-gray-800' :
+                            themeKey === 'pink' ? 'bg-pink-400' :
+                            'bg-blue-400'
+                          }`}></div>
+                          <span className="text-sm">{themeName}</span>
+                        </div>
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
 

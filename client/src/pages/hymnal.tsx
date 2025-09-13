@@ -55,10 +55,11 @@ export default function Hymnal() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h5 className="font-medium">Música de Fundo</h5>
-                  <p className="text-sm text-muted-foreground">Meditação e Oração</p>
+                  <h5 className="font-medium">Meditação e Oração</h5>
+                  <p className="text-sm text-muted-foreground">Música de Fundo</p>
                 </div>
                 <Button
+                  variant="outline"
                   onClick={() => setLocation('/background-music')}
                   className="flex items-center space-x-2"
                   data-testid="button-background-music"
@@ -120,7 +121,7 @@ export default function Hymnal() {
                   <CardContent className="flex items-center p-3">
                     <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mr-3">
                       <span className="text-sm font-bold text-primary">
-                        {hymn.number.toString().padStart(3, '0')}
+                        {hymn.number.toString().padStart(2, '0')}
                       </span>
                     </div>
                     <div className="flex-1">
@@ -166,7 +167,7 @@ export default function Hymnal() {
                     <CardContent className="flex items-center p-3">
                       <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center mr-3">
                         <span className="text-sm font-bold text-red-600">
-                          {hymn.number.toString().padStart(3, '0')}
+                          {hymn.number.toString().padStart(2, '0')}
                         </span>
                       </div>
                       <div className="flex-1">
@@ -210,7 +211,7 @@ export default function Hymnal() {
                     <CardContent className="flex items-center p-3">
                       <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
                         <span className="text-sm font-bold text-blue-600">
-                          {hymn.number.toString().padStart(3, '0')}
+                          {hymn.number.toString().padStart(2, '0')}
                         </span>
                       </div>
                       <div className="flex-1">

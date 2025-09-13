@@ -61,6 +61,7 @@ export default function Bible() {
   const [highlightedVerses, setHighlightedVerses] = useState<{[key: string]: 'yellow' | 'green' | 'blue' | null}>({});
   const [showHighlightOptions, setShowHighlightOptions] = useState<number | null>(null);
   const [rangeStart, setRangeStart] = useState<number | null>(null);
+  const [showTranslationSelector, setShowTranslationSelector] = useState(false);
 
   useEffect(() => {
     // Convert array format to object format for easier access
@@ -79,12 +80,14 @@ export default function Bible() {
   const nextChapter = () => {
     if (currentChapter < maxChapters) {
       setCurrentChapter(currentChapter + 1);
+      window.scrollTo(0, 0);
     }
   };
 
   const prevChapter = () => {
     if (currentChapter > 1) {
       setCurrentChapter(currentChapter - 1);
+      window.scrollTo(0, 0);
     }
   };
 
@@ -202,18 +205,49 @@ export default function Bible() {
       <div className="p-4 pb-24">
         <div className="mb-6">
           
-          {/* Search Bar */}
-          <div className="relative mb-4">
-            <Input
-              type="text"
-              placeholder="Buscar livros ou versículos..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-              data-testid="input-bible-search"
-            />
-            <Search className="w-4 h-4 absolute left-3 top-3.5 text-muted-foreground" />
+          {/* Search Bar and Translation Selector */}
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="relative flex-1">
+              <Input
+                type="text"
+                placeholder="Buscar livros..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 text-sm"
+                data-testid="input-bible-search"
+              />
+              <Search className="w-4 h-4 absolute left-3 top-3 text-muted-foreground" />
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowTranslationSelector(!showTranslationSelector)}
+              className="px-3 text-xs font-medium"
+              data-testid="button-translation-selector"
+            >
+              ARC
+            </Button>
           </div>
+
+          {/* Translation Selector Dropdown */}
+          {showTranslationSelector && (
+            <Card className="mb-4">
+              <CardContent className="p-4">
+                <h4 className="font-semibold mb-3">Traduções Disponíveis</h4>
+                <div className="space-y-2">
+                  <button
+                    onClick={() => setShowTranslationSelector(false)}
+                    className="w-full text-left p-2 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors"
+                  >
+                    <div>
+                      <p className="font-medium text-primary">A Almeida Revista e Corrigida (ARC)</p>
+                      <p className="text-xs text-muted-foreground">Tradução atual</p>
+                    </div>
+                  </button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Search Results */}
           {searchQuery.trim() && (
@@ -327,11 +361,8 @@ export default function Bible() {
           )}
 
 
-          {/* Font Size Control and Tips */}
-          <div className="flex justify-between items-center mb-2">
-            <div className="text-xs text-muted-foreground">
-              💡 Clique em um versículo para destacar. Para marcar múltiplos, escolha uma cor primeiro.
-            </div>
+          {/* Font Size Control */}
+          <div className="flex justify-end items-center mb-2">
             <Button 
               variant="ghost" 
               size="sm" 

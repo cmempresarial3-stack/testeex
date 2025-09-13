@@ -122,6 +122,9 @@ export default function HymnView() {
             {hymn.title}
           </h1>
           <div className="flex justify-center items-center space-x-2">
+            <div className="text-sm text-muted-foreground font-medium">
+              Hino {hymn.number.toString().padStart(2, '0')}
+            </div>
             <Button 
               variant="ghost" 
               size="sm" 
@@ -130,7 +133,7 @@ export default function HymnView() {
               data-testid="button-font-size"
               title="Ajustar tamanho da fonte"
             >
-              Aa
+              Fonte: {fontSize === 'normal' ? 'Normal' : fontSize === 'large' ? 'Grande' : 'Muito Grande'}
             </Button>
           </div>
         </div>
@@ -173,26 +176,14 @@ export default function HymnView() {
         <Card>
           <CardContent className="p-6">
             <h3 className="font-bold text-lg mb-4 text-center">Letra</h3>
-            <div className={`space-y-4 text-center leading-relaxed transition-all duration-200 ${
+            <div className={`space-y-6 leading-relaxed transition-all duration-200 max-w-lg mx-auto ${
               fontSize === 'large' ? 'text-lg' : fontSize === 'extra-large' ? 'text-xl' : 'text-base'
             }`}>
-              {hymn.lyrics.map((verse, verseIndex) => (
-                <div key={verseIndex} className="mb-6">
-                  {verse.split('\n').map((line, lineIndex) => (
-                    <p key={lineIndex} className={`mb-2 ${
-                      fontSize === 'large' ? 'text-lg' : fontSize === 'extra-large' ? 'text-xl' : 'text-base'
-                    }`}>
-                      {line}
-                    </p>
-                  ))}
-                </div>
-              ))}
-              
-              {hymn.chorus && (
-                <div className="mt-6 p-4 bg-primary/5 rounded-lg">
-                  <p className="font-semibold text-primary mb-3">Coro:</p>
-                  {hymn.chorus.split('\n').map((line, index) => (
-                    <p key={index} className={`text-primary/90 mb-2 ${
+              {/* First verse */}
+              {hymn.lyrics[0] && (
+                <div className="mb-6">
+                  {hymn.lyrics[0].split('\n').map((line, lineIndex) => (
+                    <p key={lineIndex} className={`mb-2 text-left ${
                       fontSize === 'large' ? 'text-lg' : fontSize === 'extra-large' ? 'text-xl' : 'text-base'
                     }`}>
                       {line}
@@ -200,6 +191,33 @@ export default function HymnView() {
                   ))}
                 </div>
               )}
+              
+              {/* Chorus after first verse */}
+              {hymn.chorus && (
+                <div className="mb-6 p-4 bg-primary/5 rounded-lg">
+                  <p className="font-semibold text-primary mb-3 text-center">Coro</p>
+                  {hymn.chorus.split('\n').map((line, index) => (
+                    <p key={index} className={`text-primary/90 mb-2 text-left font-medium italic ${
+                      fontSize === 'large' ? 'text-lg' : fontSize === 'extra-large' ? 'text-xl' : 'text-base'
+                    }`}>
+                      {line}
+                    </p>
+                  ))}
+                </div>
+              )}
+              
+              {/* Remaining verses */}
+              {hymn.lyrics.slice(1).map((verse, verseIndex) => (
+                <div key={verseIndex + 1} className="mb-6">
+                  {verse.split('\n').map((line, lineIndex) => (
+                    <p key={lineIndex} className={`mb-2 text-left ${
+                      fontSize === 'large' ? 'text-lg' : fontSize === 'extra-large' ? 'text-xl' : 'text-base'
+                    }`}>
+                      {line}
+                    </p>
+                  ))}
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>
