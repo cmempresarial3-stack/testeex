@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ShoppingBag, Shield, Star, Clock, Heart, ExternalLink, X, User, Calendar } from "lucide-react";
+import { ShoppingBag, Shield, Star, Clock, Heart, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -29,7 +29,6 @@ type WeeklyProduct = Product & {
 };
 
 export default function Store() {
-  const [selectedProduct, setSelectedProduct] = useState<Product | WeeklyProduct | null>(null);
   const [showFullStore, setShowFullStore] = useState(false);
   
   const weeklyProduct = storeData.productOfWeek as WeeklyProduct;
@@ -43,7 +42,21 @@ export default function Store() {
   };
   
   const handleViewProduct = (product: Product | WeeklyProduct) => {
-    setSelectedProduct(product);
+    // Abrir em nova aba com informações do produto
+    const productData = encodeURIComponent(JSON.stringify(product));
+    window.open(`/product?data=${productData}`, '_blank', 'noopener,noreferrer');
+  };
+  
+  const handleWeeklyProductAction = (action: 'view' | 'buy') => {
+    if (action === 'buy') {
+      // Mostrar aviso e redirecionar direto para checkout
+      const confirmMessage = `Ótima escolha! 10% da sua compra são destinados a doações.\n\nVocê será redirecionado para finalizar sua compra.`;
+      if (confirm(confirmMessage)) {
+        handlePurchase(weeklyProduct.linkLoja);
+      }
+    } else {
+      handleViewProduct(weeklyProduct);
+    }
   };
 
   const formatPrice = (price: number) => {
@@ -110,7 +123,7 @@ export default function Store() {
             
             <div className="flex space-x-2">
               <Button 
-                onClick={() => handleViewProduct(weeklyProduct)}
+                onClick={() => handleWeeklyProductAction('view')}
                 variant="outline"
                 className="flex-1"
                 data-testid="button-view-weekly"
@@ -118,7 +131,7 @@ export default function Store() {
                 Ver Detalhes
               </Button>
               <Button 
-                onClick={() => handlePurchase(weeklyProduct.linkLoja)}
+                onClick={() => handleWeeklyProductAction('buy')}
                 className="flex-1"
                 data-testid="button-buy-weekly"
               >
@@ -186,13 +199,13 @@ export default function Store() {
             <div className="mb-4">
               <span className="text-2xl">✨</span>
             </div>
-            <h3 className="text-lg font-bold mb-2">"Descubra produtos que representam quem você é, sua identidade e sua fé."</h3>
+            <h3 className="text-lg font-bold mb-2">"Descubra itens que contam sua história e fortalecem sua fé."</h3>
             <Button 
               onClick={() => setShowFullStore(true)}
               className="mt-4"
               data-testid="button-full-store"
             >
-              Conheça nossa Loja Completa
+              Loja completa
             </Button>
           </CardContent>
         </Card>
@@ -205,7 +218,7 @@ export default function Store() {
               <span className="font-medium">Pagamento Seguro</span>
             </div>
             <p className="text-sm text-muted-foreground mb-2">
-              Aceitamos cartão, PIX e boleto via Mercado Pago
+              Aceitamos cartão, PIX e boleto
             </p>
             <p className="text-xs text-muted-foreground flex items-center">
               <Heart className="w-3 h-3 mr-1" />
@@ -214,90 +227,6 @@ export default function Store() {
           </CardContent>
         </Card>
 
-        {/* Product Details Modal */}
-        <Dialog open={!!selectedProduct} onOpenChange={() => setSelectedProduct(null)}>
-          <DialogContent className="max-w-[95vw] w-full mx-auto max-h-[90vh] overflow-auto">
-            {selectedProduct && (
-              <>
-                <DialogHeader className="relative">
-                  <DialogTitle className="pr-8">{selectedProduct.nome}</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <img 
-                    src={selectedProduct.imagem} 
-                    alt={selectedProduct.nome}
-                    className="w-full h-48 object-cover rounded-lg" 
-                  />
-                  
-                  <div className="flex items-center justify-between">
-                    <div>
-                      {selectedProduct.precoOriginal > 0 && (
-                        <span className="text-sm text-muted-foreground line-through block">
-                          {formatPrice(selectedProduct.precoOriginal)}
-                        </span>
-                      )}
-                      <span className="text-2xl font-bold text-primary">
-                        {formatPrice(selectedProduct.precoPromocional)}
-                      </span>
-                    </div>
-                    {selectedProduct.precoOriginal > 0 && (
-                      <Badge variant="destructive">
-                        {calculateDiscount(selectedProduct.precoOriginal, selectedProduct.precoPromocional)}% OFF
-                      </Badge>
-                    )}
-                  </div>
-                  
-                  <p className="text-muted-foreground">{selectedProduct.descricao}</p>
-                  
-                  {selectedProduct.comentarios && selectedProduct.comentarios.length > 0 && (
-                    <div>
-                      <h4 className="font-semibold mb-3">Comentários dos usuários</h4>
-                      <div className="space-y-3 max-h-32 overflow-y-auto">
-                        {selectedProduct.comentarios.map((comment, index) => (
-                          <div key={index} className="bg-muted/30 p-3 rounded-lg">
-                            <div className="flex items-center space-x-2 mb-2">
-                              <User className="w-4 h-4 text-primary" />
-                              <span className="font-medium text-sm">{comment.nome}</span>
-                              <Calendar className="w-3 h-3 text-muted-foreground" />
-                              <span className="text-xs text-muted-foreground">{formatDate(comment.data)}</span>
-                            </div>
-                            <p className="text-sm">{comment.texto}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  
-                  <div className="bg-primary/5 p-4 rounded-lg text-center">
-                    <Heart className="w-5 h-5 text-primary mx-auto mb-2" />
-                    <p className="text-sm font-medium text-primary mb-2">
-                      "Ótima escolha! 10% da sua compra são destinados a doações.
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Para conhecer mais sobre nossa marca e propósito, siga-nos nas redes sociais."
-                    </p>
-                  </div>
-                  
-                  <Button 
-                    onClick={() => handlePurchase(selectedProduct.linkLoja)}
-                    className="w-full"
-                    disabled={!selectedProduct.estoque}
-                    data-testid="button-buy-modal"
-                  >
-                    {selectedProduct.estoque ? (
-                      <>
-                        <ExternalLink className="w-4 h-4 mr-2" />
-                        Comprar Agora
-                      </>
-                    ) : (
-                      "Produto Esgotado"
-                    )}
-                  </Button>
-                </div>
-              </>
-            )}
-          </DialogContent>
-        </Dialog>
 
         {/* Full Store Modal */}
         <Dialog open={showFullStore} onOpenChange={setShowFullStore}>
@@ -326,7 +255,7 @@ export default function Store() {
                       size="sm"
                       onClick={() => {
                         setShowFullStore(false);
-                        handleViewProduct(product);
+                        setTimeout(() => handleViewProduct(product), 100);
                       }}
                       className="w-full text-xs"
                     >

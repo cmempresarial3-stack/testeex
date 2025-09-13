@@ -147,23 +147,6 @@
           "data": "2024-09-03"
         }
       ]
-    },
-    {
-      "id": "f-8",
-      "nome": "Livro Devocional 365 Dias",
-      "descricao": "Um ano inteiro de reflexões profundas. Cada dia uma nova inspiração para sua caminhada.",
-      "imagem": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
-      "precoOriginal": 54.90,
-      "precoPromocional": 44.90,
-      "estoque": true,
-      "linkLoja": "https://checkout.mercadopago.com/livro-devocional-365",
-      "comentarios": [
-        {
-          "nome": "Carla Souza",
-          "texto": "Cada reflexão é um presente! Estou no dia 180 e não consigo parar de ler.",
-          "data": "2024-09-01"
-        }
-      ]
     }
   ]
 }
