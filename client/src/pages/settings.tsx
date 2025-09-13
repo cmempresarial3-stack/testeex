@@ -245,6 +245,9 @@ export default function Settings() {
                   onCheckedChange={(checked) => {
                     if (!checked) {
                       changeTheme('light');
+                    } else {
+                      // Quando ativa pela primeira vez, vai para dark como padrão
+                      changeTheme('dark');
                     }
                   }}
                   data-testid="switch-theme-mode"
@@ -254,6 +257,20 @@ export default function Settings() {
                 <div className="space-y-3 mt-4">
                   <p className="text-sm text-muted-foreground mb-3">Escolha a cor do aplicativo:</p>
                   <div className="grid grid-cols-2 gap-3">
+                    {/* Opção Branco/Padrão */}
+                    <Button
+                      variant="outline"
+                      onClick={() => changeTheme('light')}
+                      className="h-12 flex items-center justify-center"
+                      data-testid="button-theme-light"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <div className="w-4 h-4 rounded-full bg-white border border-gray-300"></div>
+                        <span className="text-sm">Branco</span>
+                      </div>
+                    </Button>
+                    
+                    {/* Outras opções de tema */}
                     {Object.entries(THEMES).filter(([key]) => key !== 'light').map(([themeKey, themeName]) => (
                       <Button
                         key={themeKey}
