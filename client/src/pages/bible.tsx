@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { MobileContainer } from "@/components/ui/mobile-container";
 import bibleData from "@/data/bible.json";
+import bibleDataACF from "@/data/bible-acf.json";
 
 interface BibleBook {
   abbrev: string;
@@ -62,15 +63,17 @@ export default function Bible() {
   const [showHighlightOptions, setShowHighlightOptions] = useState<number | null>(null);
   const [rangeStart, setRangeStart] = useState<number | null>(null);
   const [showTranslationSelector, setShowTranslationSelector] = useState(false);
+  const [currentTranslation, setCurrentTranslation] = useState<'ARC' | 'ACF'>('ARC');
 
   useEffect(() => {
     // Convert array format to object format for easier access
     const bibleObject: BibleData = {};
-    (bibleData as BibleBook[]).forEach(book => {
+    const currentBibleData = currentTranslation === 'ACF' ? bibleDataACF : bibleData;
+    (currentBibleData as BibleBook[]).forEach(book => {
       bibleObject[book.abbrev] = book;
     });
     setBible(bibleObject);
-  }, []);
+  }, [currentTranslation]);
 
   const currentBook = bible[currentBookAbbrev];
   const currentText = currentBook?.chapters[currentChapter - 1] || [];
@@ -225,7 +228,7 @@ export default function Bible() {
               className="px-3 text-xs font-medium"
               data-testid="button-translation-selector"
             >
-              ARC
+              {currentTranslation}
             </Button>
           </div>
 
@@ -236,12 +239,43 @@ export default function Bible() {
                 <h4 className="font-semibold mb-3">Traduções Disponíveis</h4>
                 <div className="space-y-2">
                   <button
-                    onClick={() => setShowTranslationSelector(false)}
-                    className="w-full text-left p-2 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors"
+                    onClick={() => {
+                      setCurrentTranslation('ARC');
+                      setShowTranslationSelector(false);
+                    }}
+                    className={`w-full text-left p-2 rounded-lg transition-colors ${
+                      currentTranslation === 'ARC' 
+                        ? 'bg-primary/10 hover:bg-primary/20' 
+                        : 'hover:bg-muted/20'
+                    }`}
                   >
                     <div>
-                      <p className="font-medium text-primary">A Almeida Revista e Corrigida (ARC)</p>
-                      <p className="text-xs text-muted-foreground">Tradução atual</p>
+                      <p className={`font-medium ${
+                        currentTranslation === 'ARC' ? 'text-primary' : 'text-foreground'
+                      }`}>Almeida Revista e Corrigida (ARC)</p>
+                      <p className="text-xs text-muted-foreground">
+                        {currentTranslation === 'ARC' ? 'Tradução atual' : 'Tradução padrão'}
+                      </p>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setCurrentTranslation('ACF');
+                      setShowTranslationSelector(false);
+                    }}
+                    className={`w-full text-left p-2 rounded-lg transition-colors ${
+                      currentTranslation === 'ACF' 
+                        ? 'bg-primary/10 hover:bg-primary/20' 
+                        : 'hover:bg-muted/20'
+                    }`}
+                  >
+                    <div>
+                      <p className={`font-medium ${
+                        currentTranslation === 'ACF' ? 'text-primary' : 'text-foreground'
+                      }`}>Almeida Corrigida Fiel (ACF)</p>
+                      <p className="text-xs text-muted-foreground">
+                        {currentTranslation === 'ACF' ? 'Tradução atual' : 'Segunda opção'}
+                      </p>
                     </div>
                   </button>
                 </div>
