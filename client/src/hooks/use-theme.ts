@@ -1,21 +1,41 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useLocalStorage } from "./use-local-storage";
 
+export type Theme = 'light' | 'dark' | 'pink' | 'blue';
+
+export const THEMES = {
+  light: 'Branco',
+  dark: 'Preto', 
+  pink: 'Rosa',
+  blue: 'Azul'
+} as const;
+
 export function useTheme() {
-  const [isDarkMode, setIsDarkMode] = useLocalStorage("darkMode", false);
+  const [theme, setTheme] = useLocalStorage<Theme>("theme", "light");
 
   useEffect(() => {
     const root = document.documentElement;
-    if (isDarkMode) {
-      root.setAttribute("data-theme", "dark");
-    } else {
+    if (theme === 'light') {
       root.removeAttribute("data-theme");
+    } else {
+      root.setAttribute("data-theme", theme);
     }
-  }, [isDarkMode]);
+  }, [theme]);
 
-  const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
+  const changeTheme = (newTheme: Theme) => {
+    setTheme(newTheme);
   };
 
-  return { isDarkMode, toggleTheme };
+  // Mantém compatibilidade com código antigo
+  const isDarkMode = theme === 'dark';
+  const toggleTheme = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+  };
+
+  return { 
+    theme, 
+    changeTheme, 
+    isDarkMode, 
+    toggleTheme 
+  };
 }

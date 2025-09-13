@@ -11,13 +11,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { MobileContainer } from "@/components/ui/mobile-container";
 import { useApp } from "@/context/app-context";
 import { useNotifications } from "@/context/notification-context";
-import { useTheme } from "@/hooks/use-theme";
+import { useTheme, THEMES, Theme } from "@/hooks/use-theme";
 import { Link } from "wouter";
 
 export default function Settings() {
   const { user, setUser, settings, setSettings } = useApp();
   const { requestPermission, sendTestNotification, scheduleNotifications, getPermissionStatus } = useNotifications();
-  const { isDarkMode, toggleTheme } = useTheme();
+  const { theme, changeTheme } = useTheme();
   const [feedback, setFeedback] = useState("");
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [editName, setEditName] = useState(user?.name || "");
@@ -232,19 +232,36 @@ export default function Settings() {
 
         {/* Settings Options */}
         <div className="space-y-4">
-          {/* Dark Mode */}
+          {/* Theme Selection */}
           <Card>
             <CardContent className="p-4">
-              <div className="flex items-center justify-between">
+              <div className="mb-4">
                 <div className="flex items-center">
                   <Moon className="w-5 h-5 text-primary mr-3" />
-                  <h4 className="font-semibold">Modo Escuro</h4>
+                  <h4 className="font-semibold">Modo do Tema</h4>
                 </div>
-                <Switch 
-                  checked={isDarkMode}
-                  onCheckedChange={toggleTheme}
-                  data-testid="switch-dark-mode"
-                />
+                <p className="text-sm text-muted-foreground mt-1">Escolha a cor do aplicativo</p>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                {Object.entries(THEMES).map(([themeKey, themeName]) => (
+                  <Button
+                    key={themeKey}
+                    variant={theme === themeKey ? "default" : "outline"}
+                    onClick={() => changeTheme(themeKey as Theme)}
+                    className="h-12 flex items-center justify-center"
+                    data-testid={`button-theme-${themeKey}`}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <div className={`w-4 h-4 rounded-full ${
+                        themeKey === 'light' ? 'bg-gray-200 border border-gray-400' :
+                        themeKey === 'dark' ? 'bg-gray-800' :
+                        themeKey === 'pink' ? 'bg-pink-400' :
+                        'bg-blue-400'
+                      }`}></div>
+                      <span className="text-sm">{themeName}</span>
+                    </div>
+                  </Button>
+                ))}
               </div>
             </CardContent>
           </Card>
