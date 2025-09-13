@@ -283,7 +283,7 @@ export default function Settings() {
                           <div className={`w-4 h-4 rounded-full ${
                             themeKey === 'dark' ? 'bg-gray-800' :
                             themeKey === 'pink' ? 'bg-pink-400' :
-                            'bg-blue-400'
+                            'bg-yellow-400'
                           }`}></div>
                           <span className="text-sm">{themeName}</span>
                         </div>

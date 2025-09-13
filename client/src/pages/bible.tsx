@@ -59,7 +59,7 @@ export default function Bible() {
   const [showChapterSelector, setShowChapterSelector] = useState(false);
   const [bible, setBible] = useState<BibleData>({});
   const [fontSize, setFontSize] = useState<'normal' | 'large' | 'extra-large'>('normal');
-  const [highlightedVerses, setHighlightedVerses] = useState<{[key: string]: 'yellow' | 'green' | 'blue' | null}>({});
+  const [highlightedVerses, setHighlightedVerses] = useState<{[key: string]: 'yellow' | 'green' | 'orange' | null}>({});
   const [showHighlightOptions, setShowHighlightOptions] = useState<number | null>(null);
   const [rangeStart, setRangeStart] = useState<number | null>(null);
   const [showTranslationSelector, setShowTranslationSelector] = useState(false);
@@ -70,7 +70,16 @@ export default function Bible() {
     const bibleObject: BibleData = {};
     const currentBibleData = currentTranslation === 'ACF' ? bibleDataACF : bibleData;
     (currentBibleData as BibleBook[]).forEach(book => {
-      bibleObject[book.abbrev] = book;
+      // Normalize abbreviation to match the format expected by bibleBookNames
+      // Handle numeric prefixes (1sm -> 1Sm, 2cr -> 2Cr) and regular books (jo -> Jo)
+      const normalizedAbbrev = book.abbrev.replace(/^(\d*)(.)/g, (match, num, firstLetter) => {
+        return num + firstLetter.toUpperCase();
+      }) + book.abbrev.slice(book.abbrev.search(/[a-zA-Z]/) + 1);
+      
+      bibleObject[normalizedAbbrev] = {
+        ...book,
+        abbrev: normalizedAbbrev
+      };
     });
     setBible(bibleObject);
   }, [currentTranslation]);
@@ -149,13 +158,13 @@ export default function Bible() {
     });
   };
 
-  const highlightVerse = (verseNumber: number, color: 'yellow' | 'green' | 'blue' | null) => {
+  const highlightVerse = (verseNumber: number, color: 'yellow' | 'green' | 'orange' | null) => {
     if (rangeStart !== null && rangeStart !== verseNumber) {
       // Destacar intervalo
       const start = Math.min(rangeStart, verseNumber);
       const end = Math.max(rangeStart, verseNumber);
       
-      const updates: {[key: string]: 'yellow' | 'green' | 'blue' | null} = {};
+      const updates: {[key: string]: 'yellow' | 'green' | 'orange' | null} = {};
       for (let i = start; i <= end; i++) {
         const verseKey = `${currentBookAbbrev}-${currentChapter}-${i}`;
         updates[verseKey] = color;
@@ -418,7 +427,7 @@ export default function Bible() {
                   const fontClass = fontSize === 'large' ? 'text-lg' : fontSize === 'extra-large' ? 'text-xl' : 'text-base';
                   const highlightClass = highlight === 'yellow' ? 'bg-yellow-200 dark:bg-yellow-800' : 
                                        highlight === 'green' ? 'bg-green-200 dark:bg-green-800' :
-                                       highlight === 'blue' ? 'bg-blue-200 dark:bg-blue-800' : '';
+                                       highlight === 'orange' ? 'bg-orange-200 dark:bg-orange-800' : '';
                   const rangeStartClass = rangeStart === verseNumber ? 'ring-2 ring-primary' : '';
                   
                   return (
@@ -447,8 +456,8 @@ export default function Bible() {
                               title="Destacar em verde"
                             />
                             <button
-                              onClick={() => highlightVerse(verseNumber, 'blue')}
-                              className="w-6 h-6 rounded-full bg-blue-300 hover:bg-blue-400"
+                              onClick={() => highlightVerse(verseNumber, 'orange')}
+                              className="w-6 h-6 rounded-full bg-orange-300 hover:bg-orange-400"
                               title="Destacar em azul"
                             />
                             <button

@@ -17,6 +17,7 @@ import Devotional from "./pages/devotional";
 import Checkout from "./pages/checkout";
 import BackgroundMusic from "./pages/background-music";
 import HymnView from "./pages/hymn-view";
+import ProductView from "./pages/product-view";
 
 function AppContent() {
   const { user } = useApp();
@@ -41,6 +42,7 @@ function AppContent() {
         <Route path="/checkout" component={Checkout} />
         <Route path="/background-music" component={BackgroundMusic} />
         <Route path="/hymn/:number" component={HymnView} />
+        <Route path="/product/:productData" component={ProductView} />
         <Route>
           <Redirect to="/" />
         </Route>

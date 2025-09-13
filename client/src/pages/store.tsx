@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { ShoppingBag, Shield, Star, Clock, Heart, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -29,33 +30,46 @@ type WeeklyProduct = Product & {
 };
 
 export default function Store() {
+  const [, setLocation] = useLocation();
   const [showFullStore, setShowFullStore] = useState(false);
+  const [showPurchaseDialog, setShowPurchaseDialog] = useState(false);
+  const [selectedProductToBuy, setSelectedProductToBuy] = useState<Product | WeeklyProduct | null>(null);
   
   const weeklyProduct = storeData.productOfWeek as WeeklyProduct;
   const featuredProducts = storeData.featuredProducts as Product[];
-  const availableFeaturedProducts = featuredProducts.filter(p => p.estoque).slice(0, 8);
+  const availableFeaturedProducts = featuredProducts.filter(p => p.estoque).slice(0, 9);
   
   const handlePurchase = (linkLoja: string) => {
     if (linkLoja) {
-      window.open(linkLoja, '_blank');
+      window.open(linkLoja, '_blank', 'noopener,noreferrer');
     }
   };
   
   const handleViewProduct = (product: Product | WeeklyProduct) => {
-    // Abrir em nova aba com informações do produto
+    // Navegar para página interna de detalhes do produto
     const productData = encodeURIComponent(JSON.stringify(product));
-    window.open(`/product?data=${productData}`, '_blank', 'noopener,noreferrer');
+    setLocation(`/product/${productData}`);
   };
   
   const handleWeeklyProductAction = (action: 'view' | 'buy') => {
     if (action === 'buy') {
-      // Mostrar aviso e redirecionar direto para checkout
-      const confirmMessage = `Ótima escolha! 10% da sua compra são destinados a doações.\n\nVocê será redirecionado para finalizar sua compra.`;
-      if (confirm(confirmMessage)) {
-        handlePurchase(weeklyProduct.linkLoja);
-      }
+      setSelectedProductToBuy(weeklyProduct);
+      setShowPurchaseDialog(true);
     } else {
       handleViewProduct(weeklyProduct);
+    }
+  };
+  
+  const handleProductPurchase = (product: Product | WeeklyProduct) => {
+    setSelectedProductToBuy(product);
+    setShowPurchaseDialog(true);
+  };
+  
+  const confirmPurchase = () => {
+    if (selectedProductToBuy) {
+      handlePurchase(selectedProductToBuy.linkLoja);
+      setShowPurchaseDialog(false);
+      setSelectedProductToBuy(null);
     }
   };
 
@@ -178,15 +192,27 @@ export default function Store() {
                     )}
                   </div>
                   
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => handleViewProduct(product)}
-                    className="w-full text-xs"
-                    data-testid={`button-view-${product.id}`}
-                  >
-                    Ver Detalhes
-                  </Button>
+                  <div className="flex space-x-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleViewProduct(product)}
+                      className="flex-1 text-xs"
+                      data-testid={`button-view-${product.id}`}
+                    >
+                      Ver Detalhes
+                    </Button>
+                    <Button 
+                      variant="default" 
+                      size="sm"
+                      onClick={() => handleProductPurchase(product)}
+                      className="flex-1 text-xs"
+                      disabled={!product.estoque}
+                      data-testid={`button-buy-${product.id}`}
+                    >
+                      Comprar
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             ))}
@@ -227,6 +253,62 @@ export default function Store() {
           </CardContent>
         </Card>
 
+
+        {/* Purchase Confirmation Dialog */}
+        <Dialog open={showPurchaseDialog} onOpenChange={setShowPurchaseDialog}>
+          <DialogContent className="max-w-[90vw] w-full mx-auto">
+            <DialogHeader>
+              <DialogTitle>Confirmar Compra</DialogTitle>
+            </DialogHeader>
+            {selectedProductToBuy && (
+              <div className="space-y-4">
+                <div className="text-center">
+                  <Heart className="w-12 h-12 text-primary mx-auto mb-3" />
+                  <h3 className="text-lg font-bold text-primary mb-2">
+                    "Ótima escolha! 10% da sua compra são destinados a doações."
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Você será redirecionado para finalizar sua compra de forma segura.
+                  </p>
+                </div>
+                
+                <div className="bg-muted/30 p-4 rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <img 
+                      src={selectedProductToBuy.imagem} 
+                      alt={selectedProductToBuy.nome}
+                      className="w-16 h-16 object-cover rounded-lg" 
+                    />
+                    <div className="flex-1">
+                      <h4 className="font-semibold">{selectedProductToBuy.nome}</h4>
+                      <p className="text-lg font-bold text-primary">
+                        {formatPrice(selectedProductToBuy.precoPromocional)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex space-x-3">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setShowPurchaseDialog(false)}
+                    className="flex-1"
+                  >
+                    Cancelar
+                  </Button>
+                  <Button 
+                    onClick={confirmPurchase}
+                    className="flex-1"
+                    data-testid="button-go-to-payment"
+                  >
+                    <ExternalLink className="w-4 h-4 mr-2" />
+                    Ir para Pagamento
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
 
         {/* Full Store Modal */}
         <Dialog open={showFullStore} onOpenChange={setShowFullStore}>

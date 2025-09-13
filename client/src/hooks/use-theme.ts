@@ -1,13 +1,13 @@
 import { useEffect } from "react";
 import { useLocalStorage } from "./use-local-storage";
 
-export type Theme = 'light' | 'dark' | 'pink' | 'blue';
+export type Theme = 'light' | 'dark' | 'pink' | 'yellow';
 
 export const THEMES = {
   light: 'Branco',
   dark: 'Preto', 
   pink: 'Rosa',
-  blue: 'Azul'
+  yellow: 'Amarelo'
 } as const;
 
 export function useTheme() {
