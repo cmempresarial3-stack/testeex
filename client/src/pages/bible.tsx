@@ -71,10 +71,11 @@ export default function Bible() {
     const currentBibleData = currentTranslation === 'ACF' ? bibleDataACF : bibleData;
     (currentBibleData as BibleBook[]).forEach(book => {
       // Normalize abbreviation to match the format expected by bibleBookNames
-      // Handle numeric prefixes (1sm -> 1Sm, 2cr -> 2Cr) and regular books (jo -> Jo)
-      const normalizedAbbrev = book.abbrev.replace(/^(\d*)(.)/g, (match, num, firstLetter) => {
+      // Handle numeric prefixes (1sm -> 1Sm, 2cr -> 2Cr) and regular books (jo -> Jo, gn -> Gn)
+      const abbrev = book.abbrev.toLowerCase(); // Normalize to lowercase first
+      const normalizedAbbrev = abbrev.replace(/^(\d*)(.)/g, (match, num, firstLetter) => {
         return num + firstLetter.toUpperCase();
-      }) + book.abbrev.slice(book.abbrev.search(/[a-zA-Z]/) + 1);
+      }) + abbrev.slice(abbrev.search(/[a-zA-Z]/) + 1);
       
       bibleObject[normalizedAbbrev] = {
         ...book,
@@ -88,6 +89,7 @@ export default function Bible() {
   const currentText = currentBook?.chapters[currentChapter - 1] || [];
   const currentBookName = bibleBookNames[currentBookAbbrev] || currentBookAbbrev;
   const maxChapters = currentBook?.chapters.length || 1;
+
 
   const nextChapter = () => {
     if (currentChapter < maxChapters) {

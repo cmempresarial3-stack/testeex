@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight, Heart, Share2, Bookmark, Calendar as Calenda
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { MobileContainer } from "@/components/ui/mobile-container";
-import { getTodayDevotional, dailyDevotionals } from "@/data/devotionals";
+import { getTodayDevotional, getFullDevotional, type DailyDevotional } from "@/data/devotionals";
 import { useApp } from "@/context/app-context";
 import { Link } from "wouter";
 
@@ -13,18 +13,18 @@ export default function Devotional() {
     // Start with today's devotional
     const today = new Date();
     const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 86400000);
-    return dayOfYear % dailyDevotionals.length;
+    return dayOfYear % 3; // Using 3 devotionals for now
   });
 
-  const currentDevotional = dailyDevotionals[currentIndex];
+  const currentDevotional = getFullDevotional(currentIndex + 1);
   const userName = user?.name || "Amigo";
 
   const nextDevotional = () => {
-    setCurrentIndex((prev) => (prev + 1) % dailyDevotionals.length);
+    setCurrentIndex((prev) => (prev + 1) % 3); // Using 3 devotionals for now
   };
 
   const previousDevotional = () => {
-    setCurrentIndex((prev) => (prev - 1 + dailyDevotionals.length) % dailyDevotionals.length);
+    setCurrentIndex((prev) => (prev - 1 + 3) % 3); // Using 3 devotionals for now
   };
 
   const formatDate = (dateString: string) => {
@@ -42,7 +42,7 @@ export default function Devotional() {
     }
   };
 
-  const isToday = currentIndex === Math.floor((new Date().getTime() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000) % dailyDevotionals.length;
+  const isToday = currentIndex === Math.floor((new Date().getTime() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000) % 3;
 
   return (
     <MobileContainer>
@@ -58,7 +58,7 @@ export default function Devotional() {
           <div className="text-center">
             <h2 className="text-xl font-bold">Devocional</h2>
             <p className="text-sm text-muted-foreground">
-              {isToday ? "Hoje" : `${currentIndex + 1} de ${dailyDevotionals.length}`}
+              {isToday ? "Hoje" : `${currentIndex + 1} de 3`}
             </p>
           </div>
 
@@ -88,7 +88,7 @@ export default function Devotional() {
                 </span>
               </div>
               <h1 className="text-2xl font-bold mb-2" data-testid="text-devotional-title">
-                {currentDevotional.title}
+                {currentDevotional.theme}
               </h1>
               <p className="text-muted-foreground">
                 De: Deus, Para: {userName}
@@ -103,10 +103,10 @@ export default function Devotional() {
                   <span className="text-sm font-medium text-primary">Versículo base</span>
                 </div>
                 <p className="bible-verse text-lg mb-3 font-medium" data-testid="text-devotional-verse">
-                  "{currentDevotional.verse}"
+                  "{currentDevotional.verse.text}"
                 </p>
                 <p className="text-sm text-muted-foreground text-right" data-testid="text-devotional-reference">
-                  {currentDevotional.verseReference}
+                  {currentDevotional.verse.reference}
                 </p>
               </CardContent>
             </Card>
@@ -115,7 +115,7 @@ export default function Devotional() {
             <div className="space-y-4">
               <div className="prose prose-sm max-w-none dark:prose-invert">
                 <p className="text-base leading-relaxed" data-testid="text-devotional-content">
-                  {currentDevotional.content}
+                  {currentDevotional.reflection}
                 </p>
               </div>
             </div>
@@ -133,7 +133,7 @@ export default function Devotional() {
               </Button>
 
               <div className="flex space-x-1">
-                {dailyDevotionals.map((_, index) => (
+                {[0, 1, 2].map((index: number) => (
                   <button
                     key={index}
                     onClick={() => setCurrentIndex(index)}
@@ -163,9 +163,9 @@ export default function Devotional() {
               <CardContent className="p-4">
                 <h4 className="font-semibold mb-3 text-secondary">Para Reflexão:</h4>
                 <ul className="space-y-2 text-sm">
-                  <li>• Como posso aplicar esta mensagem em minha vida hoje?</li>
-                  <li>• Que aspecto desta reflexão mais tocou meu coração?</li>
-                  <li>• Como posso compartilhar esta verdade com outros?</li>
+                  {currentDevotional.questions.map((question: string, index: number) => (
+                    <li key={index}>• {question}</li>
+                  ))}
                 </ul>
               </CardContent>
             </Card>
@@ -175,15 +175,12 @@ export default function Devotional() {
               <CardContent className="p-4">
                 <h4 className="font-semibold mb-2 text-accent">Oração:</h4>
                 <p className="text-sm italic">
-                  "Senhor, obrigado por esta palavra que chegou ao meu coração hoje. 
-                  Ajuda-me a viver de acordo com sua vontade e a ser uma bênção para outros. 
-                  Em nome de Jesus, amém."
+                  {currentDevotional.prayer}
                 </p>
               </CardContent>
             </Card>
           </CardContent>
         </Card>
-
 
         {/* Call to Action */}
         <Card className="mt-6">

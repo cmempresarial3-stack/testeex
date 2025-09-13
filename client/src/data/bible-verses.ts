@@ -1,70 +1,26 @@
-import { BibleVerse } from "@shared/schema";
+import dailyDevotionals from "./daily-devotionals-clean.json";
 
-export const dailyVerses: BibleVerse[] = [
-  {
-    id: "1",
-    book: "Jeremias",
-    chapter: 29,
-    verse: 11,
-    text: "Porque eu bem sei os pensamentos que tenho a vosso respeito, diz o Senhor; pensamentos de paz, e não de mal, para vos dar o fim que esperais.",
-    reference: "Jeremias 29:11",
-    category: "hope"
-  },
-  {
-    id: "2",
-    book: "João",
-    chapter: 3,
-    verse: 16,
-    text: "Porque Deus amou o mundo de tal maneira que deu o seu Filho unigênito, para que todo aquele que nele crê não pereça, mas tenha a vida eterna.",
-    reference: "João 3:16",
-    category: "comfort"
-  },
-  {
-    id: "3",
-    book: "Filipenses",
-    chapter: 4,
-    verse: 13,
-    text: "Posso todas as coisas em Cristo que me fortalece.",
-    reference: "Filipenses 4:13",
-    category: "strength"
-  },
-  {
-    id: "4",
-    book: "Salmos",
-    chapter: 23,
-    verse: 1,
-    text: "O Senhor é o meu pastor; nada me faltará.",
-    reference: "Salmos 23:1",
-    category: "peace"
-  },
-  {
-    id: "5",
-    book: "Provérbios",
-    chapter: 3,
-    verse: 5,
-    text: "Confia no Senhor de todo o teu coração, e não te estribes no teu próprio entendimento.",
-    reference: "Provérbios 3:5",
-    category: "hope"
-  },
-  {
-    id: "6",
-    book: "Isaías",
-    chapter: 40,
-    verse: 31,
-    text: "Mas os que esperam no Senhor renovarão as forças, subirão com asas como águias; correrão, e não se cansarão; caminharão, e não se fatigarão.",
-    reference: "Isaías 40:31",
-    category: "strength"
-  },
-  {
-    id: "7",
-    book: "Mateus",
-    chapter: 11,
-    verse: 28,
-    text: "Vinde a mim, todos os que estais cansados e oprimidos, e eu vos aliviarei.",
-    reference: "Mateus 11:28",
-    category: "comfort"
-  }
-];
+export type DailyDevotional = {
+  day: number;
+  theme: string;
+  verse: {
+    text: string;
+    reference: string;
+  };
+  reflection: string;
+  questions: string[];
+  prayer: string;
+};
+
+export type BibleVerse = {
+  id: string;
+  book: string;
+  chapter: number;
+  verse: number;
+  text: string;
+  reference: string;
+  category: string;
+};
 
 export const emotionalVerses = {
   alegre: [
@@ -129,11 +85,56 @@ export const emotionalVerses = {
   ]
 };
 
+// Helper function to parse Bible reference
+function parseReference(reference: string): { book: string; chapter: number; verse: number } {
+  // Match patterns like "Salmos 23:1", "1 Coríntios 13:4", "João 3:16"
+  const match = reference.match(/^(.+?)\s+(\d+):(\d+)$/);
+  
+  if (match) {
+    const [, bookName, chapterStr, verseStr] = match;
+    return {
+      book: bookName.trim(),
+      chapter: parseInt(chapterStr, 10),
+      verse: parseInt(verseStr, 10)
+    };
+  }
+  
+  // Fallback for references without verse (like "Salmos 23")
+  const chapterMatch = reference.match(/^(.+?)\s+(\d+)$/);
+  if (chapterMatch) {
+    const [, bookName, chapterStr] = chapterMatch;
+    return {
+      book: bookName.trim(),
+      chapter: parseInt(chapterStr, 10),
+      verse: 1
+    };
+  }
+  
+  // Final fallback - just use the first word as book
+  return {
+    book: reference.split(' ')[0],
+    chapter: 1,
+    verse: 1
+  };
+}
+
 export function getDailyVerse(): BibleVerse {
   const today = new Date();
   const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 86400000);
-  const index = dayOfYear % dailyVerses.length;
-  return dailyVerses[index];
+  const index = dayOfYear % (dailyDevotionals as DailyDevotional[]).length;
+  const devotional = (dailyDevotionals as DailyDevotional[])[index];
+  
+  const parsed = parseReference(devotional.verse.reference);
+  
+  return {
+    id: devotional.day.toString(),
+    book: parsed.book,
+    chapter: parsed.chapter,
+    verse: parsed.verse,
+    text: devotional.verse.text,
+    reference: devotional.verse.reference,
+    category: "daily"
+  };
 }
 
 export function getVerseForEmotion(emotion: keyof typeof emotionalVerses) {
