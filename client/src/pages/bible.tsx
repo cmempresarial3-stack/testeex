@@ -362,26 +362,16 @@ export default function Bible() {
 
               {/* Actions */}
               <div className="flex items-center justify-between mt-6 pt-4 border-t border-border">
-                <div className="flex items-center space-x-2">
-                  <Button 
-                    variant="outline" 
-                    size="icon"
-                    onClick={prevChapter}
-                    disabled={currentChapter <= 1}
-                    data-testid="button-prev-chapter-bottom"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="icon"
-                    onClick={nextChapter}
-                    disabled={currentChapter >= maxChapters}
-                    data-testid="button-next-chapter-bottom"
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </Button>
-                </div>
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  onClick={prevChapter}
+                  disabled={currentChapter <= 1}
+                  data-testid="button-prev-chapter-bottom"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </Button>
+                
                 <div className="flex items-center space-x-2">
                   <Button variant="outline" size="icon" data-testid="button-bookmark">
                     <Bookmark className="w-4 h-4" />
@@ -392,13 +382,28 @@ export default function Bible() {
                   <Button variant="outline" size="icon" data-testid="button-share">
                     <Share2 className="w-4 h-4" />
                   </Button>
-                </div>
-                <div className="flex items-center">
-                  <Button variant="ghost" size="sm" className="text-xs" data-testid="button-audio-tts">
-                    <Play className="w-3 h-3 mr-1" />
-                    Áudio
+                  <Button 
+                    variant="outline" 
+                    size="icon" 
+                    onClick={() => {
+                      // TODO: Implementar reprodução de áudio TTS
+                      console.log('Reproduzir áudio do capítulo');
+                    }}
+                    data-testid="button-audio-tts"
+                  >
+                    <Play className="w-4 h-4" />
                   </Button>
                 </div>
+                
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  onClick={nextChapter}
+                  disabled={currentChapter >= maxChapters}
+                  data-testid="button-next-chapter-bottom"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
               </div>
             </CardContent>
           </Card>
