@@ -192,27 +192,15 @@ export default function Store() {
                     )}
                   </div>
                   
-                  <div className="flex space-x-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => handleViewProduct(product)}
-                      className="flex-1 text-xs"
-                      data-testid={`button-view-${product.id}`}
-                    >
-                      Ver Detalhes
-                    </Button>
-                    <Button 
-                      variant="default" 
-                      size="sm"
-                      onClick={() => handleProductPurchase(product)}
-                      className="flex-1 text-xs"
-                      disabled={!product.estoque}
-                      data-testid={`button-buy-${product.id}`}
-                    >
-                      Comprar
-                    </Button>
-                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleViewProduct(product)}
+                    className="w-full text-xs"
+                    data-testid={`button-view-${product.id}`}
+                  >
+                    Ver Detalhes
+                  </Button>
                 </CardContent>
               </Card>
             ))}
@@ -227,10 +215,11 @@ export default function Store() {
             </div>
             <h3 className="text-lg font-bold mb-2">"Descubra itens que contam sua história e fortalecem sua fé."</h3>
             <Button 
-              onClick={() => setShowFullStore(true)}
+              onClick={() => window.open('https://loja.example.com', '_blank', 'noopener,noreferrer')}
               className="mt-4"
               data-testid="button-full-store"
             >
+              <ExternalLink className="w-4 h-4 mr-2" />
               Loja completa
             </Button>
           </CardContent>

@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
-import { ArrowLeft, Heart, ExternalLink, User, Calendar, Star } from "lucide-react";
+import { ArrowLeft, Heart, ExternalLink, User, Calendar, Star, MessageCircle, Send } from "lucide-react";
 import { useLocation, useParams } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { MobileContainer } from "@/components/ui/mobile-container";
 
 type Product = {
@@ -31,6 +34,10 @@ export default function ProductView() {
   const [, setLocation] = useLocation();
   const params = useParams<{ productData: string }>();
   const [product, setProduct] = useState<Product | WeeklyProduct | null>(null);
+  const [showPurchaseDialog, setShowPurchaseDialog] = useState(false);
+  const [showCommentForm, setShowCommentForm] = useState(false);
+  const [commentForm, setCommentForm] = useState({ nome: '', email: '', texto: '' });
+  const [commentSubmitted, setCommentSubmitted] = useState(false);
 
   useEffect(() => {
     try {
@@ -38,6 +45,8 @@ export default function ProductView() {
         const decodedData = decodeURIComponent(params.productData);
         const productData = JSON.parse(decodedData);
         setProduct(productData);
+        // Scroll to top when product loads
+        window.scrollTo(0, 0);
       } else {
         setLocation("/store");
       }
@@ -64,11 +73,22 @@ export default function ProductView() {
   };
 
   const handlePurchase = () => {
-    if (!product) return;
-    
-    const confirmMessage = `Ótima escolha! 10% da sua compra são destinados a doações.\n\nVocê será redirecionado para finalizar sua compra.`;
-    if (confirm(confirmMessage)) {
+    setShowPurchaseDialog(true);
+  };
+
+  const confirmPurchase = () => {
+    if (product) {
       window.open(product.linkLoja, '_blank', 'noopener,noreferrer');
+      setShowPurchaseDialog(false);
+    }
+  };
+
+  const handleCommentSubmit = () => {
+    if (commentForm.nome && commentForm.email && commentForm.texto) {
+      setCommentSubmitted(true);
+      setShowCommentForm(false);
+      setCommentForm({ nome: '', email: '', texto: '' });
+      setTimeout(() => setCommentSubmitted(false), 3000);
     }
   };
 
@@ -189,44 +209,183 @@ export default function ProductView() {
           </CardContent>
         </Card>
 
-        {/* Customer Comments */}
-        {product.comentarios && product.comentarios.length > 0 && (
-          <Card className="mb-6">
-            <CardContent className="p-6">
-              <h3 className="font-bold text-lg mb-4 flex items-center">
-                <Star className="w-5 h-5 text-yellow-500 mr-2" />
-                Avaliações dos Clientes
-              </h3>
-              <div className="space-y-4">
-                {product.comentarios.map((comment, index) => (
-                  <div key={index} className="bg-muted/30 p-4 rounded-lg">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <User className="w-4 h-4 text-primary" />
-                      <span className="font-medium text-sm">{comment.nome}</span>
-                      <Calendar className="w-3 h-3 text-muted-foreground" />
-                      <span className="text-xs text-muted-foreground">{formatDate(comment.data)}</span>
-                    </div>
-                    <p className="text-sm leading-relaxed">{comment.texto}</p>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Donation Message */}
-        <Card className="mb-6 bg-primary/5 border-primary/20">
-          <CardContent className="p-6 text-center">
-            <Heart className="w-8 h-8 text-primary mx-auto mb-3" />
-            <h3 className="font-bold text-lg mb-2 text-primary">
-              "Ótima escolha! 10% da sua compra são destinados a doações."
+        {/* Comments Section */}
+        <Card className="mb-6">
+          <CardContent className="p-6">
+            <h3 className="font-bold text-lg mb-4 flex items-center">
+              <MessageCircle className="w-5 h-5 text-primary mr-2" />
+              Comentários
             </h3>
-            <p className="text-sm text-muted-foreground">
-              Para conhecer mais sobre nossa marca e propósito, siga-nos nas redes sociais.
-            </p>
+            
+            {/* Fake Comments */}
+            <div className="space-y-4 mb-6">
+              <div className="bg-muted/30 p-4 rounded-lg">
+                <div className="flex items-center space-x-2 mb-2">
+                  <User className="w-4 h-4 text-primary" />
+                  <span className="font-medium text-sm">Maria Silva</span>
+                  <Calendar className="w-3 h-3 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">15/09/2025</span>
+                </div>
+                <p className="text-sm leading-relaxed">Produto excelente! A qualidade superou minhas expectativas. Recomendo muito!</p>
+              </div>
+              
+              <div className="bg-muted/30 p-4 rounded-lg">
+                <div className="flex items-center space-x-2 mb-2">
+                  <User className="w-4 h-4 text-primary" />
+                  <span className="font-medium text-sm">João Santos</span>
+                  <Calendar className="w-3 h-3 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">12/09/2025</span>
+                </div>
+                <p className="text-sm leading-relaxed">Chegou rapidinho e bem embalado. Muito satisfeito com a compra!</p>
+              </div>
+              
+              <div className="bg-muted/30 p-4 rounded-lg">
+                <div className="flex items-center space-x-2 mb-2">
+                  <User className="w-4 h-4 text-primary" />
+                  <span className="font-medium text-sm">Ana Costa</span>
+                  <Calendar className="w-3 h-3 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">08/09/2025</span>
+                </div>
+                <p className="text-sm leading-relaxed">Linda peça! Vai ficar perfeita na minha casa. O atendimento também foi ótimo.</p>
+              </div>
+            </div>
+            
+            {/* Comment Success Message */}
+            {commentSubmitted && (
+              <div className="mb-4 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                <p className="text-sm font-medium text-green-600 dark:text-green-400">
+                  ✅ Comentário enviado com sucesso!
+                </p>
+              </div>
+            )}
+            
+            {/* Comment Button */}
+            <Button 
+              onClick={() => setShowCommentForm(true)}
+              className="w-full"
+              data-testid="button-add-comment"
+            >
+              <MessageCircle className="w-4 h-4 mr-2" />
+              Adicionar Comentário
+            </Button>
           </CardContent>
         </Card>
+
       </div>
+
+      {/* Purchase Confirmation Dialog */}
+      <Dialog open={showPurchaseDialog} onOpenChange={setShowPurchaseDialog}>
+        <DialogContent className="max-w-[90vw] w-full mx-auto">
+          <DialogHeader>
+            <DialogTitle>Confirmar Compra</DialogTitle>
+          </DialogHeader>
+          {product && (
+            <div className="space-y-4">
+              <div className="text-center">
+                <Heart className="w-12 h-12 text-primary mx-auto mb-3" />
+                <h3 className="text-lg font-bold text-primary mb-2">
+                  "Ótima escolha! 10% da sua compra são destinados a doações."
+                </h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Você será redirecionado para finalizar sua compra de forma segura.
+                </p>
+              </div>
+              
+              <div className="bg-muted/30 p-4 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <img 
+                    src={product.imagem} 
+                    alt={product.nome}
+                    className="w-16 h-16 object-cover rounded-lg" 
+                  />
+                  <div className="flex-1">
+                    <h4 className="font-semibold">{product.nome}</h4>
+                    <p className="text-lg font-bold text-primary">
+                      {formatPrice(product.precoPromocional)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex space-x-3">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowPurchaseDialog(false)}
+                  className="flex-1"
+                >
+                  Cancelar
+                </Button>
+                <Button 
+                  onClick={confirmPurchase}
+                  className="flex-1"
+                  data-testid="button-confirm-purchase"
+                >
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  Ir para Pagamento
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Comment Form Dialog */}
+      <Dialog open={showCommentForm} onOpenChange={setShowCommentForm}>
+        <DialogContent className="max-w-[90vw] w-full mx-auto">
+          <DialogHeader>
+            <DialogTitle>Adicionar Comentário</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">Nome *</label>
+              <Input 
+                value={commentForm.nome}
+                onChange={(e) => setCommentForm(prev => ({ ...prev, nome: e.target.value }))}
+                placeholder="Seu nome"
+                data-testid="input-comment-name"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Email *</label>
+              <Input 
+                type="email"
+                value={commentForm.email}
+                onChange={(e) => setCommentForm(prev => ({ ...prev, email: e.target.value }))}
+                placeholder="seu@email.com"
+                data-testid="input-comment-email"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Comentário *</label>
+              <Textarea 
+                value={commentForm.texto}
+                onChange={(e) => setCommentForm(prev => ({ ...prev, texto: e.target.value }))}
+                placeholder="Escreva seu comentário sobre o produto..."
+                rows={4}
+                data-testid="input-comment-text"
+              />
+            </div>
+            <div className="flex space-x-3">
+              <Button 
+                variant="outline" 
+                onClick={() => setShowCommentForm(false)}
+                className="flex-1"
+              >
+                Cancelar
+              </Button>
+              <Button 
+                onClick={handleCommentSubmit}
+                className="flex-1"
+                disabled={!commentForm.nome || !commentForm.email || !commentForm.texto}
+                data-testid="button-submit-comment"
+              >
+                <Send className="w-4 h-4 mr-2" />
+                Enviar Comentário
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </MobileContainer>
   );
 }
