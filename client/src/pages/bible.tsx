@@ -285,28 +285,6 @@ export default function Bible() {
             </Card>
           )}
 
-          {/* Navigation */}
-          <div className="flex items-center justify-between mb-4">
-            <Button 
-              variant="outline" 
-              size="icon"
-              onClick={prevChapter}
-              disabled={currentChapter <= 1}
-              data-testid="button-prev-chapter"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </Button>
-            <span className="font-medium">{currentBookName} {currentChapter}</span>
-            <Button 
-              variant="outline" 
-              size="icon"
-              onClick={nextChapter}
-              disabled={currentChapter >= maxChapters}
-              data-testid="button-next-chapter"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </Button>
-          </div>
 
           {/* Font Size Control */}
           <div className="flex justify-end mb-2">
