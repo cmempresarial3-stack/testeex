@@ -8,23 +8,23 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { MobileContainer } from "@/components/ui/mobile-container";
 import { hymns, searchHymns } from "@/data/hymns";
+import { useRecentHymns } from "@/hooks/use-recent-hymns";
 
 export default function Hymnal() {
   const [searchQuery, setSearchQuery] = useState("");
   const [favorites, setFavorites] = useState<number[]>([1, 30, 45]);
-  const [recentHymns, setRecentHymns] = useState<number[]>([5, 12, 25]);
   const [showAllHymns, setShowAllHymns] = useState(false);
   const [, setLocation] = useLocation();
+  const { recentHymns, addToRecent } = useRecentHymns();
 
   const filteredHymns = searchQuery ? searchHymns(searchQuery) : hymns;
   const favoriteHymns = hymns.filter(h => favorites.includes(h.number));
-  const recentHymnsList = hymns.filter(h => recentHymns.includes(h.number));
+  // Order recent hymns by recency (most recent first)
+  const recentHymnsList = recentHymns.map(number => hymns.find(h => h.number === number)).filter(Boolean) as typeof hymns;
 
   const selectHymn = (hymn: typeof hymns[0]) => {
-    // Add to recent if not already there
-    if (!recentHymns.includes(hymn.number)) {
-      setRecentHymns([hymn.number, ...recentHymns.slice(0, 4)]);
-    }
+    // Add to recent hymns list
+    addToRecent(hymn.number);
     // Navigate to individual hymn page
     setLocation(`/hymn/${hymn.number}`);
   };

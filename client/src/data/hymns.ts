@@ -1,51 +1,54 @@
 import { Hymn } from "@shared/schema";
+import hymnData from "./hymns.json";
 
-export const hymns: Hymn[] = [
-  {
-    id: "1",
-    number: 1,
-    title: "Chuvas de Bênçãos",
-    lyrics: [
-      "Gotas da graça, gotas caíram",
-      "Já sobre mim, mas as chuvas nada",
-      "Do que está por vir, chuvas de bênçãos",
-      "Nós esperamos, gotas somente",
-      "Agora vemos, chuvas copiosas",
-      "Deus prometeu"
-    ],
-    chorus: "Chuvas de bênçãos, Chuvas de bênçãos, Deus prometeu! Chuvas de bênçãos, Chuvas de bênçãos, Vamos ter!"
-  },
-  {
-    id: "15",
-    number: 15,
-    title: "A Voz de Jesus",
-    lyrics: [
-      "A voz de Jesus, com doce união,",
-      "Proclama a todos: vinde",
-      "Achado tenho gozo, paz, perdão",
-      "Na graça que nos salva sempre"
-    ],
-    chorus: "Oh! Vinde, oh! Vinde A Cristo, o Salvador Achado tenho gozo, paz E eterno amor"
-  },
-  {
-    id: "19",
-    number: 19,
-    title: "Ceia do Senhor",
-    lyrics: [
-      "Jesus, quando estava para ser entregue,",
-      "Tomou o pão e deu graças ao Pai",
-      "Partiu dizendo: 'Este é meu corpo",
-      "Que por vós é dado; fazei isto em memória'"
-    ],
-    chorus: "Oh! Santa ceia do Senhor, Sagrado memorial Do grande amor, do grande amor De Cristo, nosso Salvador"
+// Transform JSON data to match our Hymn interface
+function transformHymnData(): Hymn[] {
+  const hymns: Hymn[] = [];
+  
+  for (const [key, data] of Object.entries(hymnData)) {
+    // Skip metadata entry
+    if (key === "-1") continue;
+    
+    const hymnObj = data as {
+      hino: string;
+      coro?: string;
+      verses: { [key: string]: string };
+    };
+    
+    // Extract title from "number - title" format
+    const titleMatch = hymnObj.hino.match(/^\d+\s*-\s*(.+)$/);
+    const title = titleMatch ? titleMatch[1] : hymnObj.hino;
+    
+    // Convert verses object to array and clean HTML tags
+    const lyrics: string[] = [];
+    Object.values(hymnObj.verses).forEach(verse => {
+      const cleanVerse = verse.replace(/<br\s*\/?>/gi, '\n');
+      lyrics.push(cleanVerse);
+    });
+    
+    // Clean chorus if it exists
+    const chorus = hymnObj.coro ? hymnObj.coro.replace(/<br\s*\/?>/gi, '\n') : "";
+    
+    hymns.push({
+      id: key,
+      number: parseInt(key),
+      title,
+      lyrics,
+      chorus
+    });
   }
-];
+  
+  return hymns.sort((a, b) => a.number - b.number);
+}
+
+export const hymns = transformHymnData();
 
 export function searchHymns(query: string): Hymn[] {
   const lowerQuery = query.toLowerCase();
   return hymns.filter(hymn => 
     hymn.title.toLowerCase().includes(lowerQuery) ||
     hymn.number.toString().includes(query) ||
-    hymn.lyrics.some(line => line.toLowerCase().includes(lowerQuery))
+    hymn.lyrics.some(line => line.toLowerCase().includes(lowerQuery)) ||
+    (hymn.chorus && hymn.chorus.toLowerCase().includes(lowerQuery))
   );
 }

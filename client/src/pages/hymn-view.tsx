@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { MobileContainer } from "@/components/ui/mobile-container";
 import { hymns } from "@/data/hymns";
+import { useRecentHymns } from "@/hooks/use-recent-hymns";
 
 export default function HymnView() {
   const [, setLocation] = useLocation();
@@ -13,19 +14,22 @@ export default function HymnView() {
   const [isFavorite, setIsFavorite] = useState(false);
   const [hymn, setHymn] = useState<typeof hymns[0] | null>(null);
   const [fontSize, setFontSize] = useState<'normal' | 'large' | 'extra-large'>('normal');
+  const { addToRecent } = useRecentHymns();
 
   useEffect(() => {
     const hymnNumber = parseInt(params.number || "0");
     const foundHymn = hymns.find(h => h.number === hymnNumber);
     if (foundHymn) {
       setHymn(foundHymn);
+      // Add to recent hymns when viewed
+      addToRecent(hymnNumber);
       // Check if it's in favorites (this would normally come from context/state)
       const favorites = JSON.parse(localStorage.getItem('hymn-favorites') || '[]');
       setIsFavorite(favorites.includes(hymnNumber));
     } else {
       setLocation("/hymnal");
     }
-  }, [params.number, setLocation]);
+  }, [params.number, setLocation, addToRecent]);
 
   const toggleFavorite = () => {
     if (!hymn) return;
@@ -172,10 +176,16 @@ export default function HymnView() {
             <div className={`space-y-4 text-center leading-relaxed transition-all duration-200 ${
               fontSize === 'large' ? 'text-lg' : fontSize === 'extra-large' ? 'text-xl' : 'text-base'
             }`}>
-              {hymn.lyrics.map((line, index) => (
-                <p key={index} className="text-base">
-                  {line}
-                </p>
+              {hymn.lyrics.map((verse, verseIndex) => (
+                <div key={verseIndex} className="mb-6">
+                  {verse.split('\n').map((line, lineIndex) => (
+                    <p key={lineIndex} className={`mb-2 ${
+                      fontSize === 'large' ? 'text-lg' : fontSize === 'extra-large' ? 'text-xl' : 'text-base'
+                    }`}>
+                      {line}
+                    </p>
+                  ))}
+                </div>
               ))}
               
               {hymn.chorus && (
