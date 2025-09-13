@@ -1,54 +1,49 @@
-import { ShoppingBag, Shield } from "lucide-react";
+import { useState } from "react";
+import { ShoppingBag, Shield, Star, Clock, Heart, ExternalLink, X, User, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { MobileContainer } from "@/components/ui/mobile-container";
+import storeData from "@/data/store-products.json";
 
-const products = [
-  {
-    id: 1,
-    name: "Pulseira QR Cristã",
-    description: "Conecte-se instantaneamente ao verso do dia",
-    price: 29.90,
-    image: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400",
-    featured: true,
-  },
-  {
-    id: 2,
-    name: "Bíblia de Estudo",
-    description: "Tradução ACF com notas",
-    price: 89.90,
-    image: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
-  },
-  {
-    id: 3,
-    name: "Camiseta Fé",
-    description: "100% algodão cristão",
-    price: 39.90,
-    image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
-  },
-  {
-    id: 4,
-    name: "Caneca Inspiração",
-    description: "Para seus momentos com Deus",
-    price: 24.90,
-    image: "https://images.unsplash.com/photo-1514228742587-6b1558fcf93a?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
-  },
-  {
-    id: 5,
-    name: "Quadro Versículo",
-    description: "Decoração cristã",
-    price: 59.90,
-    image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
-  },
-];
+type Product = {
+  id: string;
+  nome: string;
+  descricao: string;
+  imagem: string;
+  precoOriginal: number;
+  precoPromocional: number;
+  estoque: boolean;
+  linkLoja: string;
+  comentarios: Array<{
+    nome: string;
+    texto: string;
+    data: string;
+  }>;
+};
+
+type WeeklyProduct = Product & {
+  badge: string;
+  urgencia: string;
+};
 
 export default function Store() {
-  const featuredProduct = products.find(p => p.featured);
-  const otherProducts = products.filter(p => !p.featured);
-
-  const handlePurchase = (productId: number) => {
-    // Redirect to checkout page with product ID
-    window.location.href = `/checkout?product=${productId}`;
+  const [selectedProduct, setSelectedProduct] = useState<Product | WeeklyProduct | null>(null);
+  const [showFullStore, setShowFullStore] = useState(false);
+  
+  const weeklyProduct = storeData.productOfWeek as WeeklyProduct;
+  const featuredProducts = storeData.featuredProducts as Product[];
+  const availableFeaturedProducts = featuredProducts.filter(p => p.estoque).slice(0, 8);
+  
+  const handlePurchase = (linkLoja: string) => {
+    if (linkLoja) {
+      window.open(linkLoja, '_blank');
+    }
+  };
+  
+  const handleViewProduct = (product: Product | WeeklyProduct) => {
+    setSelectedProduct(product);
   };
 
   const formatPrice = (price: number) => {
@@ -56,6 +51,15 @@ export default function Store() {
       style: 'currency',
       currency: 'BRL'
     }).format(price);
+  };
+  
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('pt-BR');
+  };
+  
+  const calculateDiscount = (original: number, promotional: number) => {
+    if (original === 0) return 0;
+    return Math.round(((original - promotional) / original) * 100);
   };
 
   return (
@@ -66,59 +70,132 @@ export default function Store() {
           <p className="text-muted-foreground">Produtos que fortalecem sua fé</p>
         </div>
 
-        {/* Featured Product */}
-        {featuredProduct && (
-          <Card className="mb-6">
-            <CardContent className="p-6">
-              <img 
-                src={featuredProduct.image} 
-                alt={featuredProduct.name}
-                className="w-full h-48 object-cover rounded-lg mb-4" 
-              />
-              <h3 className="text-xl font-bold mb-2">{featuredProduct.name}</h3>
-              <p className="text-muted-foreground mb-4">{featuredProduct.description}</p>
-              <div className="flex items-center justify-between">
+        {/* Produto da Semana */}
+        <Card className="mb-6 relative overflow-hidden border-primary/20">
+          <div className="absolute top-0 left-0 bg-gradient-to-r from-red-500 to-orange-500 text-white px-3 py-1 text-xs font-bold rounded-br-lg">
+            {weeklyProduct.badge}
+          </div>
+          <CardContent className="p-6 pt-12">
+            <img 
+              src={weeklyProduct.imagem} 
+              alt={weeklyProduct.nome}
+              className="w-full h-48 object-cover rounded-lg mb-4 cursor-pointer" 
+              onClick={() => handleViewProduct(weeklyProduct)}
+            />
+            <h3 className="text-xl font-bold mb-2">{weeklyProduct.nome}</h3>
+            <p className="text-muted-foreground mb-4">{weeklyProduct.descricao}</p>
+            
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex flex-col">
+                {weeklyProduct.precoOriginal > 0 && (
+                  <span className="text-sm text-muted-foreground line-through">
+                    {formatPrice(weeklyProduct.precoOriginal)}
+                  </span>
+                )}
                 <span className="text-2xl font-bold text-primary">
-                  {formatPrice(featuredProduct.price)}
+                  {formatPrice(weeklyProduct.precoPromocional)}
                 </span>
-                <Button 
-                  onClick={() => handlePurchase(featuredProduct.id)}
-                  data-testid={`button-buy-${featuredProduct.id}`}
-                >
-                  Comprar Agora
-                </Button>
+                {weeklyProduct.precoOriginal > 0 && (
+                  <Badge variant="destructive" className="w-fit mt-1">
+                    {calculateDiscount(weeklyProduct.precoOriginal, weeklyProduct.precoPromocional)}% OFF
+                  </Badge>
+                )}
               </div>
-            </CardContent>
-          </Card>
-        )}
+            </div>
+            
+            <div className="flex items-center space-x-2 mb-4">
+              <Clock className="w-4 h-4 text-orange-500" />
+              <span className="text-sm font-medium text-orange-600">{weeklyProduct.urgencia}</span>
+            </div>
+            
+            <div className="flex space-x-2">
+              <Button 
+                onClick={() => handleViewProduct(weeklyProduct)}
+                variant="outline"
+                className="flex-1"
+                data-testid="button-view-weekly"
+              >
+                Ver Detalhes
+              </Button>
+              <Button 
+                onClick={() => handlePurchase(weeklyProduct.linkLoja)}
+                className="flex-1"
+                data-testid="button-buy-weekly"
+              >
+                Comprar Agora
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
-        {/* Product Grid */}
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          {otherProducts.map((product) => (
-            <Card key={product.id} data-testid={`card-product-${product.id}`}>
-              <CardContent className="p-4">
-                <img 
-                  src={product.image} 
-                  alt={product.name}
-                  className="w-full h-32 object-cover rounded-lg mb-3" 
-                />
-                <h4 className="font-semibold mb-2">{product.name}</h4>
-                <p className="text-sm text-muted-foreground mb-2">{product.description}</p>
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-primary">{formatPrice(product.price)}</span>
+        {/* Produtos em Destaque */}
+        <div className="mb-6">
+          <h3 className="text-xl font-bold mb-4 flex items-center">
+            <Star className="w-5 h-5 text-yellow-500 mr-2" />
+            Produtos em Destaque
+          </h3>
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            {availableFeaturedProducts.map((product) => (
+              <Card key={product.id} data-testid={`card-product-${product.id}`} className="hover:shadow-md transition-shadow">
+                <CardContent className="p-3">
+                  {!product.estoque && (
+                    <div className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
+                      Esgotado
+                    </div>
+                  )}
+                  <img 
+                    src={product.imagem} 
+                    alt={product.nome}
+                    className="w-full h-32 object-cover rounded-lg mb-3 cursor-pointer" 
+                    onClick={() => handleViewProduct(product)}
+                  />
+                  <h4 className="font-semibold mb-2 text-sm">{product.nome}</h4>
+                  
+                  <div className="mb-3">
+                    {product.precoOriginal > 0 && (
+                      <span className="text-xs text-muted-foreground line-through block">
+                        {formatPrice(product.precoOriginal)}
+                      </span>
+                    )}
+                    <span className="font-bold text-primary">{formatPrice(product.precoPromocional)}</span>
+                    {product.precoOriginal > 0 && (
+                      <Badge variant="destructive" className="ml-1 text-xs">
+                        -{calculateDiscount(product.precoOriginal, product.precoPromocional)}%
+                      </Badge>
+                    )}
+                  </div>
+                  
                   <Button 
-                    variant="ghost" 
+                    variant="outline" 
                     size="sm"
-                    onClick={() => handlePurchase(product.id)}
+                    onClick={() => handleViewProduct(product)}
+                    className="w-full text-xs"
                     data-testid={`button-view-${product.id}`}
                   >
-                    Ver
+                    Ver Detalhes
                   </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
+
+        {/* Banner Final */}
+        <Card className="mb-6 bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/20">
+          <CardContent className="p-6 text-center">
+            <div className="mb-4">
+              <span className="text-2xl">✨</span>
+            </div>
+            <h3 className="text-lg font-bold mb-2">"Descubra produtos que representam quem você é, sua identidade e sua fé."</h3>
+            <Button 
+              onClick={() => setShowFullStore(true)}
+              className="mt-4"
+              data-testid="button-full-store"
+            >
+              Conheça nossa Loja Completa
+            </Button>
+          </CardContent>
+        </Card>
 
         {/* Payment Info */}
         <Card>
@@ -127,11 +204,140 @@ export default function Store() {
               <Shield className="w-5 h-5 text-primary" />
               <span className="font-medium">Pagamento Seguro</span>
             </div>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground mb-2">
               Aceitamos cartão, PIX e boleto via Mercado Pago
+            </p>
+            <p className="text-xs text-muted-foreground flex items-center">
+              <Heart className="w-3 h-3 mr-1" />
+              10% da sua compra são destinados a doações
             </p>
           </CardContent>
         </Card>
+
+        {/* Product Details Modal */}
+        <Dialog open={!!selectedProduct} onOpenChange={() => setSelectedProduct(null)}>
+          <DialogContent className="max-w-[95vw] w-full mx-auto max-h-[90vh] overflow-auto">
+            {selectedProduct && (
+              <>
+                <DialogHeader className="relative">
+                  <DialogTitle className="pr-8">{selectedProduct.nome}</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <img 
+                    src={selectedProduct.imagem} 
+                    alt={selectedProduct.nome}
+                    className="w-full h-48 object-cover rounded-lg" 
+                  />
+                  
+                  <div className="flex items-center justify-between">
+                    <div>
+                      {selectedProduct.precoOriginal > 0 && (
+                        <span className="text-sm text-muted-foreground line-through block">
+                          {formatPrice(selectedProduct.precoOriginal)}
+                        </span>
+                      )}
+                      <span className="text-2xl font-bold text-primary">
+                        {formatPrice(selectedProduct.precoPromocional)}
+                      </span>
+                    </div>
+                    {selectedProduct.precoOriginal > 0 && (
+                      <Badge variant="destructive">
+                        {calculateDiscount(selectedProduct.precoOriginal, selectedProduct.precoPromocional)}% OFF
+                      </Badge>
+                    )}
+                  </div>
+                  
+                  <p className="text-muted-foreground">{selectedProduct.descricao}</p>
+                  
+                  {selectedProduct.comentarios && selectedProduct.comentarios.length > 0 && (
+                    <div>
+                      <h4 className="font-semibold mb-3">Comentários dos usuários</h4>
+                      <div className="space-y-3 max-h-32 overflow-y-auto">
+                        {selectedProduct.comentarios.map((comment, index) => (
+                          <div key={index} className="bg-muted/30 p-3 rounded-lg">
+                            <div className="flex items-center space-x-2 mb-2">
+                              <User className="w-4 h-4 text-primary" />
+                              <span className="font-medium text-sm">{comment.nome}</span>
+                              <Calendar className="w-3 h-3 text-muted-foreground" />
+                              <span className="text-xs text-muted-foreground">{formatDate(comment.data)}</span>
+                            </div>
+                            <p className="text-sm">{comment.texto}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div className="bg-primary/5 p-4 rounded-lg text-center">
+                    <Heart className="w-5 h-5 text-primary mx-auto mb-2" />
+                    <p className="text-sm font-medium text-primary mb-2">
+                      "Ótima escolha! 10% da sua compra são destinados a doações.
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Para conhecer mais sobre nossa marca e propósito, siga-nos nas redes sociais."
+                    </p>
+                  </div>
+                  
+                  <Button 
+                    onClick={() => handlePurchase(selectedProduct.linkLoja)}
+                    className="w-full"
+                    disabled={!selectedProduct.estoque}
+                    data-testid="button-buy-modal"
+                  >
+                    {selectedProduct.estoque ? (
+                      <>
+                        <ExternalLink className="w-4 h-4 mr-2" />
+                        Comprar Agora
+                      </>
+                    ) : (
+                      "Produto Esgotado"
+                    )}
+                  </Button>
+                </div>
+              </>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Full Store Modal */}
+        <Dialog open={showFullStore} onOpenChange={setShowFullStore}>
+          <DialogContent className="max-w-[95vw] w-full mx-auto max-h-[90vh] overflow-auto">
+            <DialogHeader>
+              <DialogTitle>Loja Completa - Todos os Produtos</DialogTitle>
+            </DialogHeader>
+            <div className="grid grid-cols-2 gap-4 max-h-[70vh] overflow-auto">
+              {featuredProducts.map((product) => (
+                <Card key={product.id} className="hover:shadow-md transition-shadow">
+                  <CardContent className="p-3">
+                    <img 
+                      src={product.imagem} 
+                      alt={product.nome}
+                      className="w-full h-24 object-cover rounded-lg mb-2" 
+                    />
+                    <h4 className="font-semibold text-sm mb-1">{product.nome}</h4>
+                    <div className="mb-2">
+                      <span className="font-bold text-primary text-sm">{formatPrice(product.precoPromocional)}</span>
+                      {!product.estoque && (
+                        <Badge variant="destructive" className="ml-1 text-xs">Esgotado</Badge>
+                      )}
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => {
+                        setShowFullStore(false);
+                        handleViewProduct(product);
+                      }}
+                      className="w-full text-xs"
+                    >
+                      Ver
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </DialogContent>
+        </Dialog>
 
         {/* Shopping Cart Float */}
         <Button 
