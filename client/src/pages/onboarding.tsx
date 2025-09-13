@@ -14,15 +14,6 @@ export default function Onboarding() {
   const { setUser } = useApp();
   const [, setLocation] = useLocation();
 
-  // Gerar avatar automaticamente quando o nome mudar
-  useEffect(() => {
-    if (name.trim()) {
-      const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(name.trim())}&background=3b82f6&color=fff&size=128`;
-      setPhoto(avatarUrl);
-    } else {
-      setPhoto(undefined);
-    }
-  }, [name]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,17 +52,6 @@ export default function Onboarding() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="text-center mb-6">
-            <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-primary flex items-center justify-center">
-              {photo ? (
-                <img src={photo} alt="Preview" className="w-24 h-24 rounded-full object-cover" />
-              ) : (
-                <span className="text-primary-foreground font-semibold text-lg">
-                  {name.charAt(0).toUpperCase() || '?'}
-                </span>
-              )}
-            </div>
-          </div>
           
           <div>
             <Label htmlFor="name" className="text-sm font-medium mb-2 block">
